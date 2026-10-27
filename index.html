@@ -820,7 +820,7 @@ body.reduced-motion * { animation-duration: 0.01ms !important; transition-durati
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, setPersistence, browserLocalPersistence }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, onValue, set, update, push, get, serverTimestamp, off, query, orderByChild, runTransaction }
+import { getDatabase, ref, onValue, set, update, push, get, serverTimestamp, query, orderByChild, runTransaction }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
@@ -1485,7 +1485,7 @@ function startListeners() {
       console.error("orders err", err);
       if (currentRoute.startsWith("orders")) renderOrdersError(err);
     });
-    state.unsubscribers.push(() => off(ordersRef, "value", un1));
+    state.unsubscribers.push(un1);
 
     // Apps
     const appsRef = ref(db, "paidApps");
@@ -1493,7 +1493,7 @@ function startListeners() {
       state.apps = normalize(snap.val()) || {};
       if (currentRoute.startsWith("apps") || currentRoute.startsWith("new") || currentRoute.startsWith("edit") || currentRoute.startsWith("orders")) renderRoute();
     }, (err) => { console.error("apps err", err); });
-    state.unsubscribers.push(() => off(appsRef, "value", un2));
+    state.unsubscribers.push(un2);
 
     // Purchases
     const purRef = ref(db, "purchases");
@@ -1501,7 +1501,7 @@ function startListeners() {
       state.purchases = normalize(snap.val()) || {};
       if (currentRoute.startsWith("customers") || currentRoute.startsWith("sales") || currentRoute.startsWith("orders")) renderRoute();
     }, (err) => { console.error("purchases err", err); });
-    state.unsubscribers.push(() => off(purRef, "value", un3));
+    state.unsubscribers.push(un3);
 
     // .info/connected
     const infoRef = ref(db, ".info/connected");
@@ -1509,7 +1509,7 @@ function startListeners() {
       if (!snap.val()) setOffline(true);
       else if (navigator.onLine) setOffline(false);
     });
-    state.unsubscribers.push(() => off(infoRef, "value", un4));
+    state.unsubscribers.push(un4);
   } catch (e) {
     console.error("startListeners err", e);
     toast("Listeners start nahi hue: " + e.message, "error");
@@ -1542,14 +1542,7 @@ function renderOrdersError(err) {
   view.append(ec);
 }
 
-// ================= THEME init + placeholder render functions =================
-// (Real render functions defined in HISSA 2 and HISSA 3)
-function renderOrders(view) { if (typeof window.__renderOrders === "function") window.__renderOrders(view); else view.innerHTML = "<div class='loader-wrap'>Orders...</div>"; }
-function renderApps(view) { if (typeof window.__renderApps === "function") window.__renderApps(view); else view.innerHTML = "<div class='loader-wrap'>Apps...</div>"; }
-function renderForm(view, id) { if (typeof window.__renderForm === "function") window.__renderForm(view, id); else view.innerHTML = "<div class='loader-wrap'>Form...</div>"; }
-function renderCustomers(view) { if (typeof window.__renderCustomers === "function") window.__renderCustomers(view); else view.innerHTML = "<div class='loader-wrap'>Customers...</div>"; }
-function renderSales(view) { if (typeof window.__renderSales === "function") window.__renderSales(view); else view.innerHTML = "<div class='loader-wrap'>Sales...</div>"; }
-function renderIO(view) { if (typeof window.__renderIO === "function") window.__renderIO(view); else view.innerHTML = "<div class='loader-wrap'>Import/Export...</div>"; }
+// Render functions are defined below; router calls those implementations directly.
 
 // ================= Boot =================
 loadThemePrefs();
@@ -1809,7 +1802,6 @@ async function revokeOrder(o, view) {
   if (success) toast("Access revoke ho gaya", "success");
   renderOrders(view);
 }
-window.__renderOrders = renderOrders;
 
 // ---------- APPS ----------
 function renderApps(view) {
@@ -1994,10 +1986,800 @@ function letterAvatar(name) {
   return el("div", { class: "app-icon", text: letter });
 }
 
-window.__renderApps = renderApps;
 
 console.log("HISSA 2 loaded OK");
 // ==== HISSA 2 END ====
+// ================= HISSA 3: Form + Customers + Sales + IO =================
+// Ye code HISSA 2 ke baad usi <script type="module"> me paste karna hai.
+
+// ---------- APK Reader (tested code as is) ----------
+const MAX_TAIL = 70000;
+const MAX_CD = 32 * 1024 * 1024;
+const MAX_MANIFEST = 16 * 1024 * 1024;
+
+function withTimeout(promise, ms, msg) {
+  let t;
+  const timer = new Promise((_, rej) => { t = setTimeout(() => rej(new Error(msg || "timeout")), ms); });
+  return Promise.race([promise, timer]).finally(() => clearTimeout(t));
+}
+async function readBytes(blob, start, end) {
+  return new Uint8Array(await blob.slice(start, end).arrayBuffer());
+}
+async function inflateRaw(bytes) {
+  if (typeof DecompressionStream === "function") {
+    try {
+      const ds = new DecompressionStream("deflate-raw");
+      const out = new Response(new Blob([bytes]).stream().pipeThrough(ds)).arrayBuffer();
+      return new Uint8Array(await withTimeout(out, 8000, "inflate timeout"));
+    } catch (e) { /* neeche fallback */ }
+  }
+  const m = await withTimeout(import("https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js"), 8000, "lib timeout");
+  return m.inflateSync(bytes);
+}
+async function findManifest(file) {
+  const size = file.size;
+  if (size < 22) throw new Error("File bahut chhoti hai");
+  const tailStart = Math.max(0, size - MAX_TAIL);
+  const tail = await readBytes(file, tailStart, size);
+  const tdv = new DataView(tail.buffer, tail.byteOffset, tail.byteLength);
+  let eocd = -1;
+  for (let i = tail.length - 22; i >= 0; i--) {
+    if (tdv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error("Ye valid APK/zip nahi lag raha");
+  const entries = tdv.getUint16(eocd + 10, true);
+  const cdSize = tdv.getUint32(eocd + 12, true);
+  const cdOffset = tdv.getUint32(eocd + 16, true);
+  if (cdSize === 0xffffffff || cdOffset === 0xffffffff || entries === 0xffff) throw new Error("ZIP64 APK abhi support nahi");
+  if (cdSize > MAX_CD || cdOffset + cdSize > size) throw new Error("Central directory kharab hai");
+  const cd = await readBytes(file, cdOffset, cdOffset + cdSize);
+  const dv = new DataView(cd.buffer, cd.byteOffset, cd.byteLength);
+  const dec = new TextDecoder("utf-8");
+  let p = 0;
+  for (let n = 0; n < entries && p + 46 <= cd.length; n++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true);
+    const compSize = dv.getUint32(p + 20, true);
+    const nameLen = dv.getUint16(p + 28, true);
+    const extraLen = dv.getUint16(p + 30, true);
+    const commentLen = dv.getUint16(p + 32, true);
+    const localOff = dv.getUint32(p + 42, true);
+    const name = dec.decode(cd.subarray(p + 46, p + 46 + nameLen));
+    if (name === "AndroidManifest.xml") {
+      if (compSize > MAX_MANIFEST) throw new Error("Manifest bahut bada hai");
+      const lh = await readBytes(file, localOff, localOff + 30);
+      const ldv = new DataView(lh.buffer, lh.byteOffset, lh.byteLength);
+      if (ldv.getUint32(0, true) !== 0x04034b50) throw new Error("Local header kharab hai");
+      const dataStart = localOff + 30 + ldv.getUint16(26, true) + ldv.getUint16(28, true);
+      const raw = await readBytes(file, dataStart, dataStart + compSize);
+      if (method === 0) return raw;
+      if (method === 8) return await inflateRaw(raw);
+      throw new Error("Anjaan compression (" + method + ")");
+    }
+    p += 46 + nameLen + extraLen + commentLen;
+  }
+  throw new Error("AndroidManifest.xml nahi mila");
+}
+function parseAxml(buf) {
+  const len = buf.length;
+  const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+  if (len < 16 || dv.getUint16(0, true) !== 0x0003) throw new Error("Manifest ka format samajh nahi aaya");
+  const strings = [];
+  const u32 = o => dv.getUint32(o, true);
+  const u16 = o => dv.getUint16(o, true);
+  let pos = u16(2) || 8;
+  let guard = 0;
+  while (pos + 8 <= len && guard++ < 200000) {
+    const type = u16(pos), hdr = u16(pos + 2), size = u32(pos + 4);
+    if (size < 8 || pos + size > len) break;
+    if (type === 0x0001) {
+      const count = Math.min(u32(pos + 8), 200000);
+      const utf8 = (u32(pos + 16) & 0x100) !== 0;
+      const strStart = pos + u32(pos + 20);
+      const offs = pos + hdr;
+      const u8dec = new TextDecoder("utf-8"), u16dec = new TextDecoder("utf-16le");
+      for (let i = 0; i < count; i++) {
+        let sp = strStart + u32(offs + 4 * i), s = "";
+        if (sp >= len) { strings.push(""); continue; }
+        if (utf8) {
+          let c = buf[sp++]; if (c & 0x80) sp++;
+          let b = buf[sp++]; if (b & 0x80) b = ((b & 0x7f) << 8) | buf[sp++];
+          if (sp + b <= len) s = u8dec.decode(buf.subarray(sp, sp + b));
+        } else {
+          let l = u16(sp); sp += 2;
+          if (l & 0x8000) { l = ((l & 0x7fff) << 16) | u16(sp); sp += 2; }
+          if (sp + l * 2 <= len) s = u16dec.decode(buf.subarray(sp, sp + l * 2));
+        }
+        strings.push(s);
+      }
+    } else if (type === 0x0102) {
+      if (strings[u32(pos + 20)] === "manifest") {
+        const attrStart = u16(pos + 24), attrSize = u16(pos + 26), attrCount = Math.min(u16(pos + 28), 200);
+        const out = { packageName: "", versionCode: 0, versionName: "" };
+        for (let k = 0; k < attrCount; k++) {
+          const a = pos + 16 + attrStart + k * (attrSize || 20);
+          if (a + 20 > len) break;
+          const name = strings[u32(a + 4)];
+          const raw = u32(a + 8), dtype = buf[a + 15], data = u32(a + 16);
+          const str = () => strings[raw !== 0xffffffff ? raw : data] || "";
+          if (name === "package") out.packageName = dtype === 0x03 || raw !== 0xffffffff ? str() : "";
+          else if (name === "versionName") out.versionName = str();
+          else if (name === "versionCode") out.versionCode = (dtype === 0x10 || dtype === 0x11) ? data : (parseInt(str(), 10) || 0);
+        }
+        return out;
+      }
+    }
+    pos += size;
+  }
+  throw new Error("Manifest me package nahi mila");
+}
+async function readApkInfo(file) {
+  const run = async () => {
+    const manifest = await findManifest(file);
+    const info = parseAxml(manifest);
+    return { ...info, sizeBytes: file.size };
+  };
+  return withTimeout(run(), 15000, "APK padhne me bahut der lagi");
+}
+async function computeSha256(file) {
+  if (file.size > 150 * 1024 * 1024) return null;
+  try {
+    const buf = await file.arrayBuffer();
+    const hash = await crypto.subtle.digest("SHA-256", buf);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, "0")).join("");
+  } catch (e) { return null; }
+}
+
+// ---------- FORM ----------
+const PKG_RE = /^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$/;
+const HEX64_RE = /^[0-9a-f]{64}$/;
+
+function renderForm(view, editId) {
+  view.innerHTML = "";
+  const isEdit = !!editId;
+  const existing = isEdit ? (state.apps && state.apps[editId]) || null : null;
+  const isNewVersion = isEdit && sessionStorage.getItem("apkstore_newver_" + editId) === "1";
+  if (isNewVersion) sessionStorage.removeItem("apkstore_newver_" + editId);
+
+  const panel = el("div", { class: "panel" });
+  panel.append(el("h2", { class: "panel-title", text: isEdit ? "App edit karein" : "Naya app" }));
+  panel.append(el("p", { class: "panel-sub", text: isEdit ? "Package: " + asString(existing?.packageName, "") : "APK GitHub Releases par upload karein, phir yahan details bharein." }));
+
+  if (isNewVersion) {
+    const banner = el("div", { class: "error-card", style: "background:var(--warning-bg);border-color:var(--warning)" });
+    banner.append(el("strong", { text: "Naya version:" }), el("div", { text: "versionCode badhayein aur apkUrl naya daalein." }));
+    panel.append(banner);
+  }
+
+  // APK auto-fill
+  const apkSection = el("div", { class: "card" });
+  apkSection.append(el("div", { class: "card-title", text: "APK file se auto-fill (optional)" }));
+  apkSection.append(el("div", { class: "card-meta", text: "File yahan select karein — package/version/size auto bharenge. File upload nahi hoti." }));
+  const apkInput = el("input", { type: "file", accept: ".apk,application/vnd.android.package-archive", style: "margin-top:10px;min-height:44px" });
+  apkInput.id = "f_apk_file";
+  const apkStatus = el("div", { class: "card-meta", style: "margin-top:8px", text: "" });
+  const apkStatusId = "f_apk_status";
+  apkStatus.id = apkStatusId;
+  apkSection.append(apkInput, apkStatus);
+
+  apkInput.addEventListener("change", async () => {
+    const file = apkInput.files && apkInput.files[0];
+    if (!file) return;
+    apkStatus.innerHTML = "";
+    const loader = createLoader(20);
+    apkStatus.append(loader, el("span", { text: " APK padh rahe hain...", style: "margin-left:6px" }));
+    pauseTheme("apk");
+    try {
+      const info = await readApkInfo(file);
+      const pkgEl = document.getElementById("f_pkg");
+      const vcEl = document.getElementById("f_versionCode");
+      const vEl = document.getElementById("f_version");
+      const szEl = document.getElementById("f_size");
+      const szbEl = document.getElementById("f_sizeBytes");
+      if (pkgEl && !trim(pkgEl.value) && info.packageName) pkgEl.value = info.packageName;
+      if (vcEl && !trim(vcEl.value) && info.versionCode) vcEl.value = String(info.versionCode);
+      if (vEl && !trim(vEl.value) && info.versionName) vEl.value = info.versionName;
+      if (szEl && !trim(szEl.value)) szEl.value = (file.size / (1024 * 1024)).toFixed(1) + " MB";
+      if (szbEl) szbEl.value = String(file.size);
+      apkStatus.innerHTML = "";
+      apkStatus.append(el("span", { class: "text-success", text: "✓ Package: " + (info.packageName || "?") + " · versionCode: " + (info.versionCode || "?") + " · versionName: " + (info.versionName || "?") }));
+
+      // SHA256
+      if (file.size <= 150 * 1024 * 1024) {
+        const shaEl = document.getElementById("f_sha256");
+        if (shaEl && !trim(shaEl.value)) {
+          apkStatus.append(el("div", { class: "card-meta", text: "SHA-256 calculate ho raha hai..." }));
+          const hash = await computeSha256(file);
+          if (hash && !trim(shaEl.value)) { shaEl.value = hash; apkStatus.append(el("div", { class: "text-success", text: "✓ SHA-256 bhar diya" })); }
+        }
+      } else {
+        apkStatus.append(el("div", { class: "card-meta", text: "sha256 bade file ke liye optional hai" }));
+      }
+      // Name placeholder suggest
+      const nameEl = document.getElementById("f_name");
+      if (nameEl && !trim(nameEl.value) && info.packageName) {
+        const suggest = info.packageName.split(".").pop();
+        nameEl.placeholder = suggest.charAt(0).toUpperCase() + suggest.slice(1);
+      }
+    } catch (e) {
+      apkStatus.innerHTML = "";
+      apkStatus.append(el("span", { class: "text-danger", text: "Auto-fill nahi ho paya: " + e.message + ". Manually bharein." }));
+    } finally {
+      resumeTheme("apk");
+    }
+  });
+  panel.append(apkSection);
+
+  // Main form
+  const form = el("form");
+  form.id = "f_app_form";
+  form.addEventListener("submit", (e) => { e.preventDefault(); saveApp(editId, existing); });
+
+  const grid = el("div", { class: "grid2" });
+
+  function fieldWrap(labelText, inputEl, id, required, hint) {
+    const wrap = el("div", { class: "field" });
+    const lab = el("label", { for: id });
+    lab.append(document.createTextNode(labelText + " "));
+    if (required) lab.append(el("span", { class: "req", text: "*" }));
+    wrap.append(lab, inputEl);
+    if (hint) wrap.append(el("div", { class: "card-meta", text: hint }));
+    const err = el("div", { class: "field-error", id: id + "_err" });
+    wrap.append(err);
+    return wrap;
+  }
+
+  function textInput(id, placeholder, value, type = "text") {
+    const i = el("input", { class: "input", id, type, placeholder, value: value == null ? "" : String(value) });
+    return i;
+  }
+
+  // Name
+  const nameInput = textInput("f_name", "App name", existing?.name || "");
+  nameInput.required = true;
+  grid.append(fieldWrap("Name", nameInput, "f_name", true));
+
+  // Package
+  const pkgInput = textInput("f_pkg", "com.example.app", existing?.packageName || "");
+  pkgInput.classList.add("mono");
+  pkgInput.required = true;
+  grid.append(fieldWrap("Package name", pkgInput, "f_pkg", true, "Pattern: com.example.app"));
+
+  // versionCode
+  const vcInput = textInput("f_versionCode", "1", existing?.versionCode || "", "number");
+  vcInput.min = "1"; vcInput.step = "1"; vcInput.required = true;
+  grid.append(fieldWrap("Version code (integer ≥ 1)", vcInput, "f_versionCode", true));
+
+  // version
+  const vInput = textInput("f_version", "1.0.0", existing?.version || "");
+  grid.append(fieldWrap("Version (name)", vInput, "f_version", false));
+
+  // size
+  const szInput = textInput("f_size", "26.9 MB", existing?.size || "");
+  grid.append(fieldWrap("Size (text)", szInput, "f_size", false));
+
+  // sizeBytes (hidden)
+  const szbInput = el("input", { type: "hidden", id: "f_sizeBytes", value: existing?.sizeBytes || "" });
+  form.append(szbInput);
+
+  // category
+  const catInput = textInput("f_category", "Game / Social / Tool", existing?.category || "");
+  catInput.setAttribute("list", "f_cat_list");
+  const catList = el("datalist", { id: "f_cat_list" });
+  const cats = new Set(["Game", "Social", "Tool"]);
+  Object.values(state.apps || {}).forEach(a => { if (a.category) cats.add(a.category); });
+  Array.from(cats).sort().forEach(c => catList.append(el("option", { value: c })));
+  grid.append(fieldWrap("Category", catInput, "f_category", false));
+  form.append(catList);
+
+  // publisher
+  const pubInput = textInput("f_publisher", "Publisher", existing?.publisher || "");
+  grid.append(fieldWrap("Publisher", pubInput, "f_publisher", false));
+
+  // rating
+  const ratInput = textInput("f_rating", "0-5", existing?.rating ?? "", "number");
+  ratInput.min = "0"; ratInput.max = "5"; ratInput.step = "0.1";
+  grid.append(fieldWrap("Rating (0-5)", ratInput, "f_rating", false));
+
+  // downloads
+  const dlInput = textInput("f_downloads", "1K+", existing?.downloads || "");
+  grid.append(fieldWrap("Downloads (text)", dlInput, "f_downloads", false));
+
+  // Price
+  const priceInput = textInput("f_price", "0", existing?.price ?? 0, "number");
+  priceInput.min = "0"; priceInput.step = "1";
+  priceInput.classList.add("price-input");
+  priceInput.required = true;
+  const priceWrap = el("div", { class: "field", style: "grid-column:1/-1" });
+  const priceLab = el("label", { for: "f_price", text: "Price (₹) — 0 matlab free" });
+  priceLab.append(el("span", { class: "req", text: " *" }));
+  priceWrap.append(priceLab, priceInput);
+  const quick = el("div", { class: "quick-prices" });
+  [0, 19, 49, 99, 199, 499].forEach(v => {
+    const b = el("button", { type: "button", class: "btn btn-sm", text: "₹" + v });
+    b.addEventListener("click", () => { priceInput.value = String(v); });
+    quick.append(b);
+  });
+  priceWrap.append(quick, el("div", { class: "field-error", id: "f_price_err" }));
+  grid.append(priceWrap);
+  form.append(grid);
+
+  // icon URL + preview
+  const iconInput = textInput("f_icon", "https://example.com/icon.png", existing?.icon || "");
+  iconInput.type = "url";
+  const iconPreview = el("img", { style: "width:48px;height:48px;border-radius:var(--radius);border:1px solid var(--border);object-fit:cover;margin-top:6px", alt: "", src: existing?.icon || "" });
+  if (!existing?.icon) iconPreview.style.display = "none";
+  iconInput.addEventListener("input", () => {
+    const v = trim(iconInput.value);
+    if (/^https?:\/\//.test(v)) { iconPreview.src = v; iconPreview.style.display = "block"; }
+    else iconPreview.style.display = "none";
+  });
+  const iconWrap = fieldWrap("Icon URL (https)", iconInput, "f_icon", false);
+  iconWrap.append(iconPreview);
+  form.append(iconWrap);
+
+  // GitHub link builder
+  const ghCard = el("div", { class: "card" });
+  ghCard.append(el("div", { class: "card-title", text: "GitHub link builder" }));
+  const ghRow = el("div", { class: "row", style: "margin-top:10px;gap:8px" });
+  const fileInput = el("input", { class: "input", id: "f_gh_file", placeholder: "app-release.apk", style: "flex:1;min-width:160px" });
+  ghRow.append(fileInput);
+  const buildBtn = el("button", { type: "button", class: "btn btn-sm", text: "Link bharein" });
+  buildBtn.addEventListener("click", () => {
+    const fn = trim(fileInput.value);
+    if (!fn) { toast("File name daalein", "error"); return; }
+    const url = "https://github.com/" + GITHUB_USER + "/" + GITHUB_REPO + "/releases/download/" + GITHUB_TAG + "/" + encodeURIComponent(fn);
+    const apkEl = document.getElementById("f_apkUrl");
+    if (apkEl) apkEl.value = url;
+    toast("apkUrl bhar diya", "success");
+  });
+  ghRow.append(buildBtn);
+  ghCard.append(ghRow);
+  form.append(ghCard);
+
+  // apkUrl
+  const apkUrlInput = textInput("f_apkUrl", "https://github.com/.../app.apk", existing ? "" : "");
+  apkUrlInput.type = "url";
+  apkUrlInput.required = true;
+  apkUrlInput.classList.add("mono");
+  const apkUrlWrap = fieldWrap("APK URL (https, required)", apkUrlInput, "f_apkUrl", true);
+  const apkUrlBtns = el("div", { class: "row", style: "margin-top:6px" });
+  const testBtn = el("button", { type: "button", class: "btn btn-sm", text: "Link test karein" });
+  testBtn.addEventListener("click", () => {
+    const v = trim(apkUrlInput.value);
+    if (!/^https:\/\//.test(v)) { toast("Pehle valid https link daalein", "error"); return; }
+    try { window.open(v, "_blank", "noopener,noreferrer"); }
+    catch (e) { toast("Popup block", "error"); }
+  });
+  apkUrlBtns.append(testBtn);
+  apkUrlBtns.append(el("span", { class: "card-meta", text: "File seedhi download honi chahiye, koi page nahi khulna chahiye" }));
+  apkUrlWrap.append(apkUrlBtns);
+  form.append(apkUrlWrap);
+
+  // sha256
+  const shaInput = textInput("f_sha256", "optional lowercase 64 hex", existing ? "" : "");
+  shaInput.classList.add("mono");
+  form.append(fieldWrap("SHA-256 (optional)", shaInput, "f_sha256", false, "Lowercase 64 hex chars"));
+
+  // description
+  const descInput = el("textarea", { class: "textarea", id: "f_description", placeholder: "Chhota description" });
+  descInput.value = existing?.description || "";
+  form.append(fieldWrap("Description (short)", descInput, "f_description", false));
+
+  const fullInput = el("textarea", { class: "textarea", id: "f_fullDescription", placeholder: "Poora description", style: "min-height:120px" });
+  fullInput.value = existing?.fullDescription || "";
+  form.append(fieldWrap("Full description", fullInput, "f_fullDescription", false));
+
+  const whatNewInput = el("textarea", { class: "textarea", id: "f_whatsNew", placeholder: "Naya kya hai?" });
+  whatNewInput.value = existing?.whatsNew || "";
+  form.append(fieldWrap("What's new", whatNewInput, "f_whatsNew", false));
+
+  const screenshotsInput = el("textarea", { class: "textarea", id: "f_screenshots", placeholder: "Ek URL per line" });
+  screenshotsInput.value = Array.isArray(existing?.screenshots) ? existing.screenshots.join("\n") : "";
+  form.append(fieldWrap("Screenshots (ek URL per line)", screenshotsInput, "f_screenshots", false));
+
+  // Switches
+  const switchRow = el("div", { class: "row", style: "margin-top:8px;gap:20px;flex-wrap:wrap" });
+  const pubSwitchWrap = el("label", { class: "switch" });
+  const pubChk = el("input", { type: "checkbox", id: "f_published" });
+  pubChk.checked = existing ? toBool(existing.published) : true;
+  pubSwitchWrap.append(pubChk, el("span", { class: "track" }), document.createTextNode(" Published"));
+  switchRow.append(pubSwitchWrap);
+
+  const featSwitchWrap = el("label", { class: "switch" });
+  const featChk = el("input", { type: "checkbox", id: "f_featured" });
+  featChk.checked = existing ? toBool(existing.featured) : false;
+  featSwitchWrap.append(featChk, el("span", { class: "track" }), document.createTextNode(" Featured"));
+  switchRow.append(featSwitchWrap);
+  form.append(switchRow);
+
+  // Actions
+  const actions = el("div", { class: "form-actions" });
+  const saveBtn = el("button", { type: "submit", class: "btn btn-primary", text: isEdit ? "Save changes" : "App save karein" });
+  const cancelBtn = el("button", { type: "button", class: "btn", text: "Cancel" });
+  cancelBtn.addEventListener("click", () => navigate("apps"));
+  actions.append(saveBtn, cancelBtn);
+  form.append(actions);
+
+  const saveStatus = el("div", { id: "f_save_status", style: "margin-top:10px" });
+  form.append(saveStatus);
+
+  panel.append(form);
+  view.append(panel);
+
+  // Load premiumLinks for edit
+  if (isEdit && editId) {
+    const linkRef = ref(db, "premiumLinks/" + editId);
+    get(linkRef).then((snap) => {
+      const v = normalize(snap.val()) || {};
+      if (v.apkUrl) apkUrlInput.value = v.apkUrl;
+      if (v.sha256) shaInput.value = v.sha256;
+    }).catch(err => {
+      console.warn("premiumLinks read fail:", err);
+    });
+  }
+
+  // saveApp function (closure)
+  async function saveApp() {
+    // clear errors
+    $$(".field-error").forEach(e => { e.textContent = ""; e.classList.remove("show"); });
+    $$(".input.error, .textarea.error").forEach(e => e.classList.remove("error"));
+
+    const errs = [];
+    function addErr(id, msg) {
+      const e = document.getElementById(id + "_err");
+      if (e) { e.textContent = msg; e.classList.add("show"); }
+      const inp = document.getElementById(id);
+      if (inp) inp.classList.add("error");
+      errs.push(msg);
+    }
+
+    const name = trim(document.getElementById("f_name").value);
+    const pkg = trim(document.getElementById("f_pkg").value);
+    const vc = parseInt(document.getElementById("f_versionCode").value, 10);
+    const version = trim(document.getElementById("f_version").value);
+    const size = trim(document.getElementById("f_size").value);
+    const sizeBytes = parseInt(document.getElementById("f_sizeBytes").value, 10) || 0;
+    const category = trim(document.getElementById("f_category").value);
+    const publisher = trim(document.getElementById("f_publisher").value);
+    const rating = parseFloat(document.getElementById("f_rating").value);
+    const downloads = trim(document.getElementById("f_downloads").value);
+    const price = parseInt(document.getElementById("f_price").value, 10);
+    const icon = trim(document.getElementById("f_icon").value);
+    const apkUrl = trim(document.getElementById("f_apkUrl").value);
+    const sha256 = trim(document.getElementById("f_sha256").value).toLowerCase();
+    const description = trim(document.getElementById("f_description").value);
+    const fullDescription = trim(document.getElementById("f_fullDescription").value);
+    const whatsNew = trim(document.getElementById("f_whatsNew").value);
+    const screenshotsRaw = document.getElementById("f_screenshots").value;
+    const published = document.getElementById("f_published").checked;
+    const featured = document.getElementById("f_featured").checked;
+
+    if (!name) addErr("f_name", "Name required");
+    if (!pkg) addErr("f_pkg", "Package required");
+    else if (!PKG_RE.test(pkg)) addErr("f_pkg", "Package format galat (com.example.app)");
+    if (!Number.isInteger(vc) || vc < 1) addErr("f_versionCode", "versionCode integer ≥ 1 hona chahiye");
+    if (!Number.isInteger(price) || price < 0) addErr("f_price", "Price integer ≥ 0 (0 = free)");
+    if (!apkUrl) addErr("f_apkUrl", "APK URL required");
+    else if (!/^https:\/\//.test(apkUrl)) addErr("f_apkUrl", "APK URL https:// se shuru hona chahiye");
+    if (icon && !/^https?:\/\//.test(icon)) addErr("f_icon", "Icon URL https only");
+    if (sha256 && !HEX64_RE.test(sha256)) addErr("f_sha256", "SHA-256 lowercase 64 hex hona chahiye");
+    if (!isNaN(rating) && (rating < 0 || rating > 5)) addErr("f_rating", "Rating 0-5");
+
+    const screenshots = screenshotsRaw.split("\n").map(s => trim(s)).filter(Boolean);
+    for (const s of screenshots) {
+      if (!/^https?:\/\//.test(s)) { addErr("f_screenshots", "Screenshot URL https only"); break; }
+    }
+
+    if (errs.length) { toast("Form me errors hain", "error"); return; }
+
+    // Duplicate packageName warning (non-blocking)
+    const dupPkg = Object.entries(state.apps || {}).find(([id, a]) => a.packageName === pkg && id !== editId);
+    if (dupPkg) toast("Warning: ye packageName pehle se hai (" + dupPkg[0] + ")", "info", 4000);
+
+    if (isWriteDisabled()) { toast("Abhi save nahi ho sakta", "error"); return; }
+
+    // SAVE BUG protection
+    let appId;
+    try {
+      appId = editId || push(ref(db, "paidApps")).key;
+      if (typeof appId !== "string" || !appId) throw new Error("App id nahi bani");
+    } catch (e) {
+      toast("App id error: " + e.message, "error");
+      return;
+    }
+
+    const appData = cleanUndefined({
+      name, packageName: pkg, versionCode: vc, version,
+      size, sizeBytes: sizeBytes || undefined,
+      category, publisher,
+      rating: isNaN(rating) ? undefined : rating,
+      downloads, icon, description, fullDescription, whatsNew,
+      screenshots: screenshots.length ? screenshots : undefined,
+      price, published, featured,
+      createdAt: existing?.createdAt || serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    const linkData = cleanUndefined({ apkUrl, sha256: sha256 || undefined });
+
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = "";
+    saveBtn.append(createLoader(18), document.createTextNode(" Saving..."));
+    saveStatus.innerHTML = "";
+    pauseTheme("save");
+
+    try {
+      const updates = {};
+      updates["paidApps/" + appId] = appData;
+      updates["premiumLinks/" + appId] = linkData;
+      await update(ref(db), updates);
+      toast("App save ho gaya", "success");
+      sessionStorage.removeItem("apkstore_newver_" + appId);
+      navigate("apps");
+    } catch (e) {
+      console.error("save err", e);
+      const code = (e && (e.code || e.message)) || "error";
+      let msg = "Save nahi hua: " + code;
+      if (String(code).includes("permission")) msg = "Permission denied — rules publish karein";
+      toast(msg, "error", 5000);
+      saveBtn.disabled = false;
+      saveBtn.textContent = "Retry save";
+    } finally {
+      resumeTheme("save");
+    }
+  }
+}
+
+// ---------- CUSTOMERS ----------
+function renderCustomers(view) {
+  view.innerHTML = "";
+
+  // Build email map from orders
+  const emailByUid = {};
+  state.ordersFlat.forEach(o => { if (o.uid && o.email) emailByUid[o.uid] = o.email; });
+
+  // Group purchases by uid
+  const customers = [];
+  Object.entries(state.purchases || {}).forEach(([uid, apps]) => {
+    const appsObj = apps && typeof apps === "object" ? apps : {};
+    const appEntries = Object.entries(appsObj);
+    if (appEntries.length === 0) return;
+    let totalSpent = 0;
+    const appsList = appEntries.map(([appId, p]) => {
+      const amt = asNumber(p && p.amount, 0);
+      totalSpent += amt;
+      return { appId, amount: amt, name: getAppName(appId) };
+    });
+    customers.push({ uid, email: emailByUid[uid] || uid, apps: appsList, totalSpent });
+  });
+  customers.sort((a, b) => b.totalSpent - a.totalSpent);
+
+  const panel = el("div", { class: "panel" });
+  panel.append(el("h2", { class: "panel-title", text: "Customers" }), el("p", { class: "panel-sub", text: "Total " + customers.length + " customers" }));
+
+  const searchInput = el("input", { class: "input", type: "search", placeholder: "Email se search...", value: window.__custSearch || "" });
+  searchInput.addEventListener("input", () => { window.__custSearch = searchInput.value; renderCustomers(view); searchInput.focus(); });
+  panel.append(searchInput);
+  view.append(panel);
+
+  let list = customers;
+  const q = (window.__custSearch || "").toLowerCase().trim();
+  if (q) list = list.filter(c => c.email.toLowerCase().includes(q) || c.uid.toLowerCase().includes(q));
+
+  if (list.length === 0) {
+    const empty = el("div", { class: "panel empty" });
+    empty.append(el("div", { class: "big", text: "👥" }), el("div", { text: "Abhi koi customer nahi" }));
+    view.append(empty);
+    return;
+  }
+
+  const cont = el("div");
+  list.forEach(c => {
+    const card = el("div", { class: "card" });
+    const head = el("div", { class: "card-head" });
+    head.append(el("div", { class: "card-title", text: c.email }));
+    head.append(el("span", { class: "price-badge", text: fmtINR(c.totalSpent) }));
+    card.append(head);
+    card.append(el("div", { class: "card-meta", text: c.apps.length + " app · UID: " + c.uid.slice(0, 10) + "..." }));
+
+    const appsDiv = el("div", { style: "margin-top:10px" });
+    c.apps.forEach(a => {
+      const row = el("div", { class: "row", style: "padding:8px 0;border-top:1px solid var(--border);justify-content:space-between" });
+      row.append(el("span", { text: a.name + " · " + fmtINR(a.amount) }));
+      const revBtn = el("button", { class: "btn btn-sm btn-danger", text: "Revoke", disabled: isWriteDisabled() ? true : undefined });
+      revBtn.addEventListener("click", async () => {
+        const ok = await showConfirm({
+          title: "Access revoke karein?",
+          body: c.email + " ka " + a.name + " access hat jayega.",
+          okText: "Haan, Revoke",
+          danger: true
+        });
+        if (!ok.ok) return;
+        const success = await guardedWrite(async () => {
+          await set(ref(db, "purchases/" + c.uid + "/" + a.appId), null);
+        });
+        if (success) { toast("Revoke ho gaya", "success"); renderCustomers(view); }
+      });
+      row.append(revBtn);
+      appsDiv.append(row);
+    });
+    card.append(appsDiv);
+    cont.append(card);
+  });
+  view.append(cont);
+}
+
+// ---------- SALES ----------
+function renderSales(view) {
+  view.innerHTML = "";
+  const approved = state.ordersFlat.filter(o => o.status === "approved");
+  const pendingOrders = state.ordersFlat.filter(o => o.status === "pending");
+
+  const now = Date.now();
+  const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
+  const todayTs = startToday.getTime();
+  const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+  const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+  const monthTs = monthStart.getTime();
+
+  let totalRev = 0, todayRev = 0, weekRev = 0, monthRev = 0;
+  const perApp = {};
+  approved.forEach(o => {
+    const amt = asNumber(o.amount, 0);
+    const ts = asNumber(o.approvedAt) || asNumber(o.createdAt);
+    totalRev += amt;
+    if (ts >= todayTs) todayRev += amt;
+    if (ts >= weekAgo) weekRev += amt;
+    if (ts >= monthTs) monthRev += amt;
+    if (!perApp[o.appId]) perApp[o.appId] = { count: 0, revenue: 0, name: getAppName(o.appId) };
+    perApp[o.appId].count++;
+    perApp[o.appId].revenue += amt;
+  });
+  const pendingValue = pendingOrders.reduce((s, o) => s + asNumber(o.amount, 0), 0);
+
+  const panel = el("div", { class: "panel" });
+  panel.append(el("h2", { class: "panel-title", text: "Sales" }), el("p", { class: "panel-sub", text: "Approved orders se calculate" }));
+
+  const stats = el("div", { class: "stat-grid" });
+  [
+    { label: "Total revenue", value: fmtINR(totalRev), price: true },
+    { label: "Total orders", value: String(approved.length) },
+    { label: "Aaj", value: fmtINR(todayRev), price: true },
+    { label: "Last 7 din", value: fmtINR(weekRev), price: true },
+    { label: "Is mahine", value: fmtINR(monthRev), price: true },
+    { label: "Pending value", value: fmtINR(pendingValue), price: true }
+  ].forEach(s => {
+    const c = el("div", { class: "stat-card" });
+    c.append(el("div", { class: "label", text: s.label }), el("div", { class: "value" + (s.price ? " price" : ""), text: s.value }));
+    stats.append(c);
+  });
+  panel.append(stats);
+
+  // Per-app table
+  const appList = Object.entries(perApp).sort((a, b) => b[1].revenue - a[1].revenue);
+  if (appList.length > 0) {
+    const tbl = el("div", { style: "margin-top:16px" });
+    tbl.append(el("div", { class: "card-title", text: "App-wise sales" }));
+    const maxRev = Math.max(...appList.map(a => a[1].revenue), 1);
+    const chart = el("div", { style: "margin-top:12px" });
+    appList.forEach(([appId, d]) => {
+      const row = el("div", { style: "margin-bottom:10px" });
+      const label = el("div", { class: "row", style: "justify-content:space-between;font-size:12px" });
+      label.append(el("span", { text: d.name }), el("span", { class: "mono", text: d.count + " orders · " + fmtINR(d.revenue) }));
+      row.append(label);
+      const barWrap = el("div", { style: "height:8px;background:var(--surface-solid);border-radius:4px;overflow:hidden;margin-top:4px;border:1px solid var(--border)" });
+      const bar = el("div", { style: "height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:" + ((d.revenue / maxRev) * 100).toFixed(1) + "%;transition:width .5s" });
+      barWrap.append(bar);
+      row.append(barWrap);
+      chart.append(row);
+    });
+    tbl.append(chart);
+    panel.append(tbl);
+  } else {
+    panel.append(el("div", { class: "empty", text: "Abhi koi approved sale nahi" }));
+  }
+
+  view.append(panel);
+}
+
+// ---------- IMPORT / EXPORT ----------
+function renderIO(view) {
+  view.innerHTML = "";
+  const panel = el("div", { class: "panel" });
+  panel.append(el("h2", { class: "panel-title", text: "Import / Export" }), el("p", { class: "panel-sub", text: "Apps ka JSON backup lein ya restore karein (apk links ke bina)" }));
+
+  // Export
+  const expCard = el("div", { class: "card" });
+  expCard.append(el("div", { class: "card-title", text: "Export JSON" }));
+  expCard.append(el("div", { class: "card-meta", text: "Sirf paidApps (price ke saath), apk links nahi." }));
+  const expBtn = el("button", { class: "btn btn-primary btn-sm", style: "margin-top:10px", text: "Export / Copy JSON" });
+  expBtn.addEventListener("click", async () => {
+    const out = {};
+    Object.entries(state.apps || {}).forEach(([id, a]) => {
+      out[id] = {
+        name: a.name, packageName: a.packageName, versionCode: a.versionCode, version: a.version,
+        size: a.size, category: a.category, publisher: a.publisher, rating: a.rating,
+        downloads: a.downloads, icon: a.icon, description: a.description,
+        fullDescription: a.fullDescription, whatsNew: a.whatsNew,
+        screenshots: a.screenshots, price: a.price, published: a.published, featured: a.featured
+      };
+    });
+    const json = JSON.stringify(out, null, 2);
+    let copied = false;
+    try { await navigator.clipboard.writeText(json); copied = true; } catch (e) {}
+    if (!copied) {
+      // textarea fallback
+      const ta = el("textarea", { class: "textarea", style: "margin-top:10px;min-height:200px;font-family:var(--font-mono);font-size:11px" });
+      ta.value = json;
+      expCard.append(ta);
+      ta.select();
+      try { document.execCommand("copy"); copied = true; } catch (e) {}
+    }
+    toast(copied ? "JSON copy ho gaya (" + Object.keys(out).length + " apps)" : "Copy fail, textarea se manually copy karein", copied ? "success" : "error", 5000);
+  });
+  expCard.append(expBtn);
+  panel.append(expCard);
+
+  // Import
+  const impCard = el("div", { class: "card" });
+  impCard.append(el("div", { class: "card-title", text: "Import JSON" }));
+  impCard.append(el("div", { class: "card-meta", text: "Array ya {id: app} object. Duplicate packageName skip honge." }));
+  const ta = el("textarea", { class: "textarea", style: "margin-top:10px;min-height:180px;font-family:var(--font-mono);font-size:12px", placeholder: '[{"name":"...","packageName":"com.x.y","price":49,...}]' });
+  impCard.append(ta);
+  const preview = el("div", { class: "card-meta", style: "margin-top:8px" });
+  const impBtn = el("button", { class: "btn btn-primary btn-sm", style: "margin-top:10px", text: "Import karein", disabled: isWriteDisabled() ? true : undefined });
+  impBtn.addEventListener("click", async () => {
+    let data;
+    try { data = JSON.parse(ta.value); }
+    catch (e) { toast("JSON parse fail: " + e.message, "error"); return; }
+    let arr = Array.isArray(data) ? data : Object.values(data || {});
+    arr = arr.filter(x => x && typeof x === "object" && x.name && x.packageName);
+    if (arr.length === 0) { toast("Koi valid app nahi mila", "error"); return; }
+    preview.textContent = arr.length + " apps ready. Import dabayein.";
+    let imported = 0, skipped = 0;
+    const existingPkgs = new Set(Object.values(state.apps || {}).map(a => a.packageName));
+    for (const a of arr) {
+      if (existingPkgs.has(a.packageName)) { skipped++; continue; }
+      try {
+        let appId;
+        try {
+          appId = push(ref(db, "paidApps")).key;
+          if (typeof appId !== "string" || !appId) throw new Error("App id nahi bani");
+        } catch (e) { skipped++; continue; }
+        const appData = cleanUndefined({
+          name: asString(a.name), packageName: asString(a.packageName),
+          versionCode: asNumber(a.versionCode, 1), version: asString(a.version),
+          size: asString(a.size), sizeBytes: asNumber(a.sizeBytes, 0) || undefined,
+          category: asString(a.category), publisher: asString(a.publisher),
+          rating: asNumber(a.rating, 0), downloads: asString(a.downloads),
+          icon: asString(a.icon), description: asString(a.description),
+          fullDescription: asString(a.fullDescription), whatsNew: asString(a.whatsNew),
+          screenshots: normalizeArray(a.screenshots).filter(Boolean),
+          price: asNumber(a.price, 0), published: toBool(a.published),
+          featured: toBool(a.featured),
+          createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+        });
+        const updates = {};
+        updates["paidApps/" + appId] = appData;
+        if (a.apkUrl && /^https:\/\//.test(a.apkUrl)) {
+          updates["premiumLinks/" + appId] = cleanUndefined({ apkUrl: a.apkUrl, sha256: a.sha256 || undefined });
+        }
+        await update(ref(db), updates);
+        existingPkgs.add(a.packageName);
+        imported++;
+      } catch (e) { console.error("import item fail", e); skipped++; }
+    }
+    toast(imported + " import hue, " + skipped + " skip hue", imported > 0 ? "success" : "error", 5000);
+    renderIO(view);
+  });
+  impCard.append(impBtn, preview);
+  panel.append(impCard);
+
+  view.append(panel);
+}
+
+console.log("HISSA 3 loaded OK — app ready");
+// ==== HISSA 3 END ====
 </script>
 </body>
 </html>
