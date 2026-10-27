@@ -1579,6 +1579,425 @@ if (document.pointerType !== "touch") {
 
 console.log("HISSA 1 loaded OK");
 // ==== HISSA 1 END ====
+// ================= HISSA 2: Orders + Apps =================
+// Ye code HISSA 1 ke baad usi <script type="module"> me paste karna hai.
+
+// ---------- Utilities shared ----------
+function getAppPrice(appId) {
+  const a = state.apps && state.apps[appId];
+  if (!a) return null;
+  return asNumber(a.price, 0);
+}
+function getAppName(appId) {
+  const a = state.apps && state.apps[appId];
+  return a ? asString(a.name, appId) : asString(appId);
+}
+function findDuplicateUTR(utr, exceptOrderKey) {
+  if (!utr) return false;
+  return state.ordersFlat.some(o => o.utr === utr && (o.uid + "/" + o.orderId) !== exceptOrderKey);
+}
+function isWriteDisabled() {
+  return isOffline || !state.isAdmin;
+}
+async function guardedWrite(fn) {
+  if (isWriteDisabled()) {
+    toast(isOffline ? "Internet nahi hai — changes save nahi honge" : "Aap admin nahi hain", "error");
+    return false;
+  }
+  try { await fn(); return true; }
+  catch (e) {
+    console.error("write err", e);
+    const code = (e && (e.code || e.message)) || "error";
+    let msg = "Save nahi hua: " + code;
+    if (String(code).includes("permission")) msg = "Permission denied — rules publish karein aur sahi email se login karein";
+    toast(msg, "error", 5000);
+    return false;
+  }
+}
+
+// ---------- ORDERS ----------
+function renderOrders(view) {
+  view.innerHTML = "";
+  const header = el("div", { class: "panel" });
+  const headRow = el("div", { class: "panel-head" });
+  const titleWrap = el("div");
+  titleWrap.append(
+    el("h2", { class: "panel-title", text: "Orders" }),
+    el("p", { class: "panel-sub", text: "Pehle apne UPI/bank app me UTR aur amount check karein, phir Approve karein." })
+  );
+  headRow.append(titleWrap);
+  header.append(headRow);
+
+  const pendingCount = state.ordersFlat.filter(o => o.status === "pending").length;
+  const approvedCount = state.ordersFlat.filter(o => o.status === "approved").length;
+  const rejectedCount = state.ordersFlat.filter(o => o.status === "rejected" || o.status === "revoked").length;
+
+  const filters = el("div", { class: "filters" });
+  const filterDefs = [
+    { key: "pending", label: "Pending", count: pendingCount },
+    { key: "approved", label: "Approved", count: approvedCount },
+    { key: "rejected", label: "Rejected / Revoked", count: rejectedCount }
+  ];
+  const currentFilter = window.__ordersFilter || "pending";
+  filterDefs.forEach(f => {
+    const b = el("button", { class: "filter-btn" + (currentFilter === f.key ? " active" : "") });
+    b.append(document.createTextNode(f.label + " "));
+    b.append(el("span", { class: "count", text: String(f.count) }));
+    b.addEventListener("click", () => { window.__ordersFilter = f.key; renderOrders(view); });
+    filters.append(b);
+  });
+  header.append(filters);
+  view.append(header);
+
+  // Filter orders
+  let orders = state.ordersFlat;
+  if (currentFilter === "pending") orders = orders.filter(o => o.status === "pending");
+  else if (currentFilter === "approved") orders = orders.filter(o => o.status === "approved");
+  else orders = orders.filter(o => o.status === "rejected" || o.status === "revoked");
+
+  if (orders.length === 0) {
+    const empty = el("div", { class: "panel empty" });
+    empty.append(el("div", { class: "big", text: "📭" }), el("div", { text: "Abhi koi order nahi" }));
+    view.append(empty);
+    return;
+  }
+
+  const list = el("div");
+  orders.forEach(o => list.append(orderCard(o, view)));
+  view.append(list);
+}
+
+function orderCard(o, view) {
+  const appPrice = getAppPrice(o.appId);
+  const amount = asNumber(o.amount, 0);
+  const card = el("div", { class: "card" });
+
+  const head = el("div", { class: "card-head" });
+  const left = el("div", { style: "min-width:0" });
+  left.append(
+    el("h3", { class: "card-title", text: getAppName(o.appId) }),
+    el("div", { class: "card-meta", text: asString(o.email, o.uid || "") }),
+    el("div", { class: "card-meta", text: fmtDate(asNumber(o.createdAt)) + (o.createdAt ? " · " + fmtAgo(asNumber(o.createdAt)) : "") })
+  );
+  head.append(left);
+
+  const right = el("div", { class: "row" });
+  const statusClass = o.status === "pending" ? "pending" : o.status === "approved" ? "approved" : (o.status === "rejected" || o.status === "revoked") ? "rejected" : "";
+  right.append(el("span", { class: "chip " + statusClass, text: asString(o.status, "unknown").toUpperCase() }));
+  head.append(right);
+  card.append(head);
+
+  // Amount vs price
+  const amountRow = el("div", { class: "row", style: "margin-top:10px;gap:10px" });
+  amountRow.append(el("span", { class: "price-badge", text: fmtINR(amount) }));
+  if (appPrice === null) {
+    amountRow.append(el("span", { class: "flag warning", text: "App ab exist nahi karta" }));
+  } else if (amount < appPrice) {
+    amountRow.append(el("span", { class: "flag danger", text: "Amount price se kam hai (app price: " + fmtINR(appPrice) + ")" }));
+  } else if (amount >= appPrice) {
+    amountRow.append(el("span", { class: "flag success", text: "✓ Amount sahi hai (app price: " + fmtINR(appPrice) + ")" }));
+  }
+  card.append(amountRow);
+
+  // UTR
+  const utrRow = el("div", { class: "utr-row", style: "margin-top:10px" });
+  utrRow.append(el("span", { class: "text-dim", text: "UTR:", style: "font-size:12px" }));
+  utrRow.append(el("span", { class: "utr", text: asString(o.utr, "—") }));
+  const copyBtn = el("button", { class: "btn btn-sm", text: "Copy" });
+  copyBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(asString(o.utr, ""));
+      toast("UTR copy ho gaya", "success");
+    } catch (e) {
+      toast("Copy fail: " + e.message, "error");
+    }
+  });
+  utrRow.append(copyBtn);
+  card.append(utrRow);
+
+  // Duplicate UTR flag
+  const dup = findDuplicateUTR(o.utr, o.uid + "/" + o.orderId);
+  if (dup) card.append(el("div", { class: "flag danger", style: "margin-top:8px", text: "⚠ Ye UTR pehle bhi use hua hai" }));
+
+  // Note
+  if (o.note) card.append(el("div", { class: "card-meta", style: "margin-top:8px", text: "Note: " + o.note }));
+
+  // Actions
+  const actions = el("div", { class: "row", style: "margin-top:12px;gap:8px" });
+  if (o.status === "pending") {
+    const approveBtn = el("button", { class: "btn btn-success btn-sm", text: "Approve", disabled: isWriteDisabled() ? true : undefined });
+    approveBtn.addEventListener("click", () => approveOrder(o, view));
+    const rejectBtn = el("button", { class: "btn btn-danger btn-sm", text: "Reject", disabled: isWriteDisabled() ? true : undefined });
+    rejectBtn.addEventListener("click", () => rejectOrder(o, view));
+    actions.append(approveBtn, rejectBtn);
+  } else if (o.status === "approved") {
+    const revokeBtn = el("button", { class: "btn btn-danger btn-sm", text: "Revoke", disabled: isWriteDisabled() ? true : undefined });
+    revokeBtn.addEventListener("click", () => revokeOrder(o, view));
+    actions.append(revokeBtn);
+  }
+  if (actions.children.length) card.append(actions);
+
+  return card;
+}
+
+async function approveOrder(o, view) {
+  const ok = await showConfirm({
+    title: "Order approve karein?",
+    body: getAppName(o.appId) + " · " + fmtINR(o.amount) + " · UTR: " + o.utr + "\nPehle UPI/bank app me verify karein.",
+    okText: "Haan, Approve",
+    danger: false
+  });
+  if (!ok.ok) return;
+  if (isWriteDisabled()) { toast("Abhi save nahi ho sakta", "error"); return; }
+  pauseTheme("save");
+  const success = await guardedWrite(async () => {
+    const updates = {};
+    updates["orders/" + o.uid + "/" + o.orderId + "/status"] = "approved";
+    updates["orders/" + o.uid + "/" + o.orderId + "/approvedAt"] = serverTimestamp();
+    updates["purchases/" + o.uid + "/" + o.appId] = {
+      orderId: o.orderId,
+      amount: asNumber(o.amount, 0),
+      approvedAt: serverTimestamp()
+    };
+    await update(ref(db), updates);
+  });
+  resumeTheme("save");
+  if (success) toast("Approve ho gaya, user ke liye app unlock", "success");
+  renderOrders(view);
+}
+
+async function rejectOrder(o, view) {
+  const res = await showConfirm({
+    title: "Order reject karein?",
+    body: "Reason optional hai. User ko dikhaya jayega.",
+    okText: "Reject karein",
+    danger: true,
+    input: true,
+    inputPlaceholder: "Reason (optional)"
+  });
+  if (!res.ok) return;
+  if (isWriteDisabled()) { toast("Abhi save nahi ho sakta", "error"); return; }
+  pauseTheme("save");
+  const success = await guardedWrite(async () => {
+    const updates = {};
+    updates["orders/" + o.uid + "/" + o.orderId + "/status"] = "rejected";
+    if (res.input && trim(res.input)) updates["orders/" + o.uid + "/" + o.orderId + "/note"] = trim(res.input);
+    await update(ref(db), updates);
+  });
+  resumeTheme("save");
+  if (success) toast("Order reject ho gaya", "success");
+  renderOrders(view);
+}
+
+async function revokeOrder(o, view) {
+  const ok = await showConfirm({
+    title: "Access revoke karein?",
+    body: getAppName(o.appId) + " · " + fmtINR(o.amount) + "\nUser ka access band ho jayega (purchase hat jayegi).",
+    okText: "Haan, Revoke",
+    danger: true
+  });
+  if (!ok.ok) return;
+  if (isWriteDisabled()) { toast("Abhi save nahi ho sakta", "error"); return; }
+  pauseTheme("save");
+  const success = await guardedWrite(async () => {
+    const updates = {};
+    updates["orders/" + o.uid + "/" + o.orderId + "/status"] = "revoked";
+    updates["purchases/" + o.uid + "/" + o.appId] = null;
+    await update(ref(db), updates);
+  });
+  resumeTheme("save");
+  if (success) toast("Access revoke ho gaya", "success");
+  renderOrders(view);
+}
+window.__renderOrders = renderOrders;
+
+// ---------- APPS ----------
+function renderApps(view) {
+  view.innerHTML = "";
+
+  const allApps = Object.entries(state.apps || {}).map(([id, a]) => ({ id, ...a }));
+  const total = allApps.length;
+  const free = allApps.filter(a => asNumber(a.price, 0) === 0).length;
+  const paid = total - free;
+  const hidden = allApps.filter(a => !toBool(a.published)).length;
+
+  // Summary panel
+  const sumPanel = el("div", { class: "panel" });
+  sumPanel.append(el("h2", { class: "panel-title", text: "Apps" }));
+  const stats = el("div", { class: "stat-grid", style: "margin-top:12px" });
+  const statDefs = [
+    { label: "Total", value: total },
+    { label: "Free", value: free },
+    { label: "Paid", value: paid },
+    { label: "Hidden", value: hidden }
+  ];
+  statDefs.forEach(s => {
+    const c = el("div", { class: "stat-card" });
+    c.append(el("div", { class: "label", text: s.label }), el("div", { class: "value", text: String(s.value) }));
+    stats.append(c);
+  });
+  sumPanel.append(stats);
+
+  // Search + filters
+  const controls = el("div", { class: "filters", style: "margin-top:12px" });
+  const searchWrap = el("div", { class: "search-wrap" });
+  const searchInput = el("input", { class: "input", type: "search", placeholder: "Name / package / publisher search...", value: window.__appsSearch || "" });
+  searchInput.addEventListener("input", () => { window.__appsSearch = searchInput.value; renderApps(view); searchInput.focus(); searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length); });
+  searchWrap.append(searchInput);
+  controls.append(searchWrap);
+
+  const filterDefs = ["All", "Free", "Paid", "Published", "Hidden"];
+  const curFilter = window.__appsFilter || "All";
+  filterDefs.forEach(f => {
+    const b = el("button", { class: "filter-btn" + (curFilter === f ? " active" : ""), text: f });
+    b.addEventListener("click", () => { window.__appsFilter = f; renderApps(view); });
+    controls.append(b);
+  });
+
+  const sortSel = el("select", { class: "select", style: "max-width:180px" });
+  [["newest", "Newest"], ["az", "A-Z"], ["price-desc", "Price high to low"]].forEach(([v, l]) => {
+    const opt = el("option", { value: v, text: l });
+    if ((window.__appsSort || "newest") === v) opt.selected = true;
+    sortSel.append(opt);
+  });
+  sortSel.addEventListener("change", () => { window.__appsSort = sortSel.value; renderApps(view); });
+  controls.append(sortSel);
+
+  sumPanel.append(controls);
+  view.append(sumPanel);
+
+  // Filter apps
+  let apps = allApps;
+  const q = (window.__appsSearch || "").toLowerCase().trim();
+  if (q) apps = apps.filter(a => (asString(a.name) + " " + asString(a.packageName) + " " + asString(a.publisher)).toLowerCase().includes(q));
+  if (curFilter === "Free") apps = apps.filter(a => asNumber(a.price, 0) === 0);
+  else if (curFilter === "Paid") apps = apps.filter(a => asNumber(a.price, 0) > 0);
+  else if (curFilter === "Published") apps = apps.filter(a => toBool(a.published));
+  else if (curFilter === "Hidden") apps = apps.filter(a => !toBool(a.published));
+
+  const sortKey = window.__appsSort || "newest";
+  if (sortKey === "az") apps.sort((a, b) => asString(a.name).localeCompare(asString(b.name)));
+  else if (sortKey === "price-desc") apps.sort((a, b) => asNumber(b.price) - asNumber(a.price));
+  else apps.sort((a, b) => asNumber(b.createdAt) - asNumber(a.createdAt));
+
+  if (apps.length === 0) {
+    const empty = el("div", { class: "panel empty" });
+    empty.append(el("div", { class: "big", text: "📱" }), el("div", { text: "Abhi koi app nahi. 'Naya app' se pehla app jodein" }));
+    view.append(empty);
+    return;
+  }
+
+  const list = el("div");
+  apps.forEach(a => list.append(appRow(a, view)));
+  view.append(list);
+}
+
+function appRow(a, view) {
+  const card = el("div", { class: "card" });
+  const row = el("div", { class: "app-row" });
+
+  // Icon
+  let icon;
+  if (a.icon && /^https?:\/\//.test(a.icon)) {
+    icon = el("img", { class: "app-icon", src: a.icon, alt: "", loading: "lazy" });
+    icon.addEventListener("error", () => { icon.replaceWith(letterAvatar(a.name)); }, { once: true });
+  } else {
+    icon = letterAvatar(a.name);
+  }
+  row.append(icon);
+
+  // Info
+  const info = el("div", { class: "app-info" });
+  info.append(
+    el("div", { class: "name", text: asString(a.name, "(no name)") }),
+    el("div", { class: "pkg", text: asString(a.packageName, "") }),
+    el("div", { class: "card-meta", text: "v" + asString(a.version, "?") + " (" + asString(a.versionCode, "?") + ") · " + asString(a.size, "?") + (a.publisher ? " · " + a.publisher : "") })
+  );
+  row.append(info);
+
+  // Price badge
+  const price = asNumber(a.price, 0);
+  const priceBadge = el("span", { class: "price-badge" + (price === 0 ? " free" : ""), text: price === 0 ? "Free" : fmtINR(price) });
+  row.append(priceBadge);
+
+  card.append(row);
+
+  // Actions row
+  const actions = el("div", { class: "app-actions", style: "margin-top:10px" });
+
+  // Published switch
+  const pubSwitch = el("label", { class: "switch" });
+  const pubInput = el("input", { type: "checkbox" });
+  pubInput.checked = toBool(a.published);
+  pubInput.disabled = isWriteDisabled();
+  pubInput.addEventListener("change", async (e) => {
+    const newVal = e.target.checked;
+    e.target.disabled = true;
+    const ok = await guardedWrite(async () => {
+      await update(ref(db, "paidApps/" + a.id), { published: newVal, updatedAt: serverTimestamp() });
+    });
+    if (ok) { a.published = newVal; toast("Published " + (newVal ? "on" : "off"), "success"); }
+    else e.target.checked = !newVal;
+    e.target.disabled = isWriteDisabled();
+  });
+  pubSwitch.append(pubInput, el("span", { class: "track" }));
+  actions.append(el("span", { class: "text-dim", text: "Published", style: "font-size:12px" }), pubSwitch);
+
+  // Featured star
+  const star = el("button", { class: "star-btn" + (toBool(a.featured) ? " on" : ""), title: "Featured", text: toBool(a.featured) ? "★" : "☆", disabled: isWriteDisabled() ? true : undefined });
+  star.addEventListener("click", async () => {
+    const newVal = !toBool(a.featured);
+    const ok = await guardedWrite(async () => {
+      await update(ref(db, "paidApps/" + a.id), { featured: newVal, updatedAt: serverTimestamp() });
+    });
+    if (ok) { a.featured = newVal; toast("Featured " + (newVal ? "on" : "off"), "success"); }
+    renderApps(view);
+  });
+  actions.append(star);
+
+  // Edit
+  const editBtn = el("button", { class: "btn btn-sm", text: "Edit" });
+  editBtn.addEventListener("click", () => navigate("edit/" + a.id));
+  actions.append(editBtn);
+
+  // Naya version
+  const newVerBtn = el("button", { class: "btn btn-sm", text: "Naya version" });
+  newVerBtn.addEventListener("click", () => { sessionStorage.setItem("apkstore_newver_" + a.id, "1"); navigate("edit/" + a.id); });
+  actions.append(newVerBtn);
+
+  // Delete
+  const delBtn = el("button", { class: "btn btn-sm btn-danger", text: "Delete", disabled: isWriteDisabled() ? true : undefined });
+  delBtn.addEventListener("click", async () => {
+    const ok = await showConfirm({
+      title: "App delete karein?",
+      body: "'" + asString(a.name) + "' ko hamesha ke liye hata dein? Purane orders/purchases safe rahenge.",
+      okText: "Haan, hatao",
+      danger: true
+    });
+    if (!ok.ok) return;
+    const success = await guardedWrite(async () => {
+      const updates = {};
+      updates["paidApps/" + a.id] = null;
+      updates["premiumLinks/" + a.id] = null;
+      await update(ref(db), updates);
+    });
+    if (success) { toast("App delete ho gaya", "success"); renderApps(view); }
+  });
+  actions.append(delBtn);
+
+  card.append(actions);
+  return card;
+}
+
+function letterAvatar(name) {
+  const letter = asString(name, "?").trim().charAt(0).toUpperCase() || "?";
+  return el("div", { class: "app-icon", text: letter });
+}
+
+window.__renderApps = renderApps;
+
+console.log("HISSA 2 loaded OK");
+// ==== HISSA 2 END ====
 </script>
 </body>
 </html>
