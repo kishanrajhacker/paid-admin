@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Premium APK Store — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #01875F; --green-soft: #E6F4EE; --green-strong: #006B4A;
+  --teal: #22B4C4; --gold: #F2C14E; --gold-soft: #FFF6E0;
+  --red: #C0392B; --red-soft: #FDECEA;
+  --bg: #F4F8F5; --bg-elev: #FFFFFF; --bg-soft: #ECF3EE;
+  --line: #D6E4DB; --line-strong: #B9D2C4;
+  --text: #0E1F16; --text-soft: #4B6358; --text-mute: #7A9084;
+  --focus: #0A9C6E;
+  --shadow: 0 1px 2px rgba(14,31,22,.06), 0 6px 20px rgba(14,31,22,.06);
+  --shadow-lg: 0 10px 40px rgba(14,31,22,.14);
+  --grad-brand: linear-gradient(135deg, #01875F, #22B4C4);
+  --grad-bg: none;
+  --radius: 14px; --radius-sm: 10px; --radius-lg: 20px;
+  --font-head: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --tap: 44px; --max: 1080px;
+  color-scheme: light;
+}
+[data-theme="hacker"] { color-scheme: dark; --green: #00FF41; --green-soft: #0A2410; --green-strong: #7CFF9B; --teal: #00C8FF; --gold: #FFD700; --gold-soft: #2A2410; --red: #FF3B3B; --red-soft: #2A0A0A; --bg: #000000; --bg-elev: #0A0F0A; --bg-soft: #101810; --line: #143018; --line-strong: #1F4A26; --text: #B8FFC4; --text-soft: #7CD88E; --text-mute: #4F8A5E; --focus: #00FF41; --shadow: 0 0 0 1px rgba(0,255,65,.1), 0 0 20px rgba(0,255,65,.06); --shadow-lg: 0 0 40px rgba(0,255,65,.15); --grad-brand: linear-gradient(135deg, #00FF41, #00C8FF); --grad-bg: radial-gradient(ellipse at top left, rgba(0,255,65,.08), transparent 60%); }
+[data-theme="crystal"] { color-scheme: dark; --green: #5EEAD4; --green-soft: #0E2A2E; --green-strong: #A7F3D0; --teal: #38BDF8; --gold: #FDE68A; --gold-soft: #2A2413; --red: #FB7185; --red-soft: #3A0F1A; --bg: #0A1626; --bg-elev: #11203A; --bg-soft: #172C4A; --line: #1E3A5F; --line-strong: #2C5580; --text: #E0F2FE; --text-soft: #93B4D4; --text-mute: #5A7A9A; --focus: #38BDF8; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(56,189,248,.1); --shadow-lg: 0 14px 44px rgba(56,189,248,.2); --grad-brand: linear-gradient(135deg, #38BDF8, #5EEAD4, #818CF8); --grad-bg: radial-gradient(ellipse at 20% 10%, rgba(56,189,248,.12), transparent 55%); }
+[data-theme="sky"] { color-scheme: dark; --green: #A78BFA; --green-soft: #1E1533; --green-strong: #C4B5FD; --teal: #F472B6; --gold: #FCD34D; --gold-soft: #2A2413; --red: #FB7185; --red-soft: #3A0F1A; --bg: #0E0A1F; --bg-elev: #161028; --bg-soft: #1E1638; --line: #2D2252; --line-strong: #3D2F6E; --text: #EDE9FE; --text-soft: #A9A0C9; --text-mute: #6F6494; --focus: #A78BFA; --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px rgba(167,139,250,.12); --shadow-lg: 0 14px 44px rgba(167,139,250,.25); --grad-brand: linear-gradient(135deg, #A78BFA, #F472B6, #38BDF8); --grad-bg: radial-gradient(ellipse at 80% 20%, rgba(167,139,250,.12), transparent 55%); }
+[data-theme="ocean"] { color-scheme: dark; --green: #22D3EE; --green-soft: #0A2A38; --green-strong: #67E8F9; --teal: #06B6D4; --gold: #FCD34D; --gold-soft: #2A2413; --red: #F87171; --red-soft: #3A0F0F; --bg: #041A28; --bg-elev: #0A2436; --bg-soft: #0E2F45; --line: #16405A; --line-strong: #235E82; --text: #CFFAFE; --text-soft: #7DD3E8; --text-mute: #4A7A8E; --focus: #22D3EE; --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px rgba(34,211,238,.1); --shadow-lg: 0 14px 44px rgba(34,211,238,.2); --grad-brand: linear-gradient(135deg, #06B6D4, #22D3EE, #3B82F6); --grad-bg: radial-gradient(ellipse at 50% 100%, rgba(34,211,238,.12), transparent 60%); }
+[data-theme="galaxy"] { color-scheme: dark; --green: #F472B6; --green-soft: #2E1030; --green-strong: #FBCFE8; --teal: #A78BFA; --gold: #FDE68A; --gold-soft: #2A2413; --red: #FB7185; --red-soft: #3A0F1A; --bg: #0A0418; --bg-elev: #140A26; --bg-soft: #1C0F33; --line: #2E1A4D; --line-strong: #452870; --text: #FCE7F3; --text-soft: #C4A9D6; --text-mute: #7A5F8E; --focus: #F472B6; --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px rgba(244,114,182,.12); --shadow-lg: 0 14px 44px rgba(244,114,182,.25); --grad-brand: linear-gradient(135deg, #F472B6, #A78BFA, #38BDF8); --grad-bg: radial-gradient(ellipse at 20% 10%, rgba(244,114,182,.12), transparent 50%), radial-gradient(ellipse at 80% 90%, rgba(167,139,250,.12), transparent 50%); }
+[data-theme="ember"] { color-scheme: dark; --green: #FB923C; --green-soft: #2E1508; --green-strong: #FDBA74; --teal: #F59E0B; --gold: #FCD34D; --gold-soft: #2A1F0A; --red: #EF4444; --red-soft: #3A0F0F; --bg: #1A0E08; --bg-elev: #26140B; --bg-soft: #331B0E; --line: #4A2814; --line-strong: #68381C; --text: #FFEDD5; --text-soft: #D4A57E; --text-mute: #8E6650; --focus: #FB923C; --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px rgba(251,146,60,.12); --shadow-lg: 0 14px 44px rgba(251,146,60,.25); --grad-brand: linear-gradient(135deg, #FB923C, #F59E0B, #EF4444); --grad-bg: radial-gradient(ellipse at 70% 0%, rgba(251,146,60,.15), transparent 55%); }
+[data-theme="sakura"] { color-scheme: light; --green: #DB2777; --green-soft: #FCE7F3; --green-strong: #9D174D; --teal: #F472B6; --gold: #F59E0B; --gold-soft: #FEF3C7; --red: #DC2626; --red-soft: #FEE2E2; --bg: #FDF2F8; --bg-elev: #FFFFFF; --bg-soft: #FCE7F3; --line: #FBCFE8; --line-strong: #F9A8D4; --text: #500724; --text-soft: #831843; --text-mute: #BE185D; --focus: #DB2777; --shadow: 0 1px 2px rgba(219,39,119,.06), 0 6px 20px rgba(219,39,119,.08); --shadow-lg: 0 10px 40px rgba(219,39,119,.15); --grad-brand: linear-gradient(135deg, #DB2777, #F472B6, #F59E0B); --grad-bg: radial-gradient(ellipse at top, rgba(219,39,119,.08), transparent 60%); }
+[data-theme="cyber"] { color-scheme: dark; --green: #FACC15; --green-soft: #2A2008; --green-strong: #FDE047; --teal: #22D3EE; --gold: #FACC15; --gold-soft: #2A2008; --red: #FF3B7F; --red-soft: #2E0A1A; --bg: #0A0A12; --bg-elev: #12121F; --bg-soft: #1A1A2E; --line: #2A2A4A; --line-strong: #3A3A6A; --text: #FEF9C3; --text-soft: #C4C4E0; --text-mute: #7A7AA0; --focus: #22D3EE; --shadow: 0 0 0 1px rgba(250,204,21,.15), 0 0 24px rgba(250,204,21,.08); --shadow-lg: 0 0 48px rgba(34,211,238,.2); --grad-brand: linear-gradient(135deg, #FACC15, #22D3EE, #F472B6); --grad-bg: radial-gradient(ellipse at 10% 10%, rgba(250,204,21,.1), transparent 50%), radial-gradient(ellipse at 90% 90%, rgba(34,211,238,.1), transparent 50%); }
+[data-theme="sunrise"] { color-scheme: light; --green: #EA580C; --green-soft: #FFEDD5; --green-strong: #9A3412; --teal: #F59E0B; --gold: #D97706; --gold-soft: #FEF3C7; --red: #DC2626; --red-soft: #FEE2E2; --bg: #FFFBEB; --bg-elev: #FFFFFF; --bg-soft: #FEF3C7; --line: #FDE68A; --line-strong: #FCD34D; --text: #451A03; --text-soft: #78350F; --text-mute: #B45309; --focus: #EA580C; --shadow: 0 1px 2px rgba(234,88,12,.06), 0 6px 20px rgba(234,88,12,.08); --shadow-lg: 0 10px 40px rgba(234,88,12,.15); --grad-brand: linear-gradient(135deg, #EA580C, #F59E0B, #FCD34D); --grad-bg: radial-gradient(ellipse at top right, rgba(234,88,12,.1), transparent 60%); }
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: var(--font-body); background: var(--bg); background-image: var(--grad-bg); background-attachment: fixed; color: var(--text); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; min-height: 100vh; overflow-x: hidden; transition: background-color .6s ease, color .6s ease; }
+h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 700; letter-spacing: -.01em; margin: 0; }
+a { color: var(--green); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+.mono { font-family: var(--font-mono); }
+.muted { color: var(--text-mute); }
+.hidden { display: none !important; }
+
+.topbar { position: sticky; top: 0; z-index: 40; background: color-mix(in srgb, var(--bg-elev) 92%, transparent); backdrop-filter: saturate(140%) blur(12px); -webkit-backdrop-filter: saturate(140%) blur(12px); border-bottom: 1px solid var(--line); }
+.topbar-inner { max-width: var(--max); margin: 0 auto; display: flex; align-items: center; gap: 10px; padding: 10px 16px; min-height: 60px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand-mark { width: 36px; height: 36px; flex: none; border-radius: 10px; background: var(--grad-brand); display: grid; place-items: center; color: #fff; font-weight: 800; font-family: var(--font-head); box-shadow: var(--shadow); font-size: 18px; }
+.brand-title { font-family: var(--font-head); font-weight: 800; font-size: 16px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand-sub { font-size: 11px; color: var(--text-mute); letter-spacing: .04em; text-transform: uppercase; }
+.topbar-spacer { flex: 1; }
+.user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; background: var(--bg-soft); border: 1px solid var(--line); min-height: 38px; }
+.user-chip img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; background: var(--line); }
+.user-chip .uc-name { font-size: 13px; font-weight: 600; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.icon-btn { width: var(--tap); height: var(--tap); min-width: var(--tap); display: inline-grid; place-items: center; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px; color: var(--text); transition: background .15s, border-color .15s, transform .15s; }
+.icon-btn:hover { background: var(--green-soft); border-color: var(--green); transform: translateY(-1px); }
+.theme-wrap { position: relative; }
+.theme-menu { position: absolute; right: 0; top: calc(100% + 8px); background: var(--bg-elev); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-lg); padding: 6px; width: 220px; z-index: 100; display: grid; gap: 2px; max-height: 70vh; overflow-y: auto; }
+.theme-menu button { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border: 0; background: transparent; border-radius: 9px; font-size: 13px; font-weight: 600; text-align: left; color: var(--text); transition: background .12s; }
+.theme-menu button:hover { background: var(--bg-soft); }
+.theme-menu button[aria-pressed="true"] { background: var(--green-soft); color: var(--green-strong); }
+.theme-swatch { width: 18px; height: 18px; border-radius: 6px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: var(--tap); padding: 0 16px; border-radius: 12px; border: 1px solid transparent; font-weight: 600; font-size: 14px; background: var(--green); color: #fff; transition: filter .15s, transform .1s; white-space: nowrap; }
+.btn:hover { filter: brightness(1.08); }
+.btn:active { transform: scale(.98); }
+.btn:disabled { opacity: .55; cursor: not-allowed; filter: none; transform: none; }
+.btn-ghost { background: var(--bg-soft); color: var(--text); border-color: var(--line); }
+.btn-ghost:hover { background: var(--green-soft); border-color: var(--green); }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-danger-ghost { background: var(--red-soft); color: var(--red); border-color: color-mix(in srgb, var(--red) 30%, transparent); }
+.btn-sm { min-height: 36px; padding: 0 12px; font-size: 13px; border-radius: 10px; }
+.btn-block { width: 100%; }
+.btn-google { background: #fff; color: #1a1a1a; border: 1px solid #d0d0d0; }
+.btn-google:hover { background: #f5f5f5; }
+.btn-google svg { width: 18px; height: 18px; }
+
+.tabs { position: sticky; top: 60px; z-index: 35; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.tabs-inner { max-width: var(--max); margin: 0 auto; padding: 0 8px; display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.tabs-inner::-webkit-scrollbar { display: none; }
+.tab { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 14px; background: transparent; border: 0; color: var(--text-soft); font-weight: 600; font-size: 14px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+.tab:hover { color: var(--text); }
+.tab[aria-current="page"] { color: var(--green); border-bottom-color: var(--green); }
+.tab-badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; font-size: 11px; font-weight: 800; border-radius: 999px; background: var(--gold); color: #3a2a00; }
+
+main { max-width: var(--max); margin: 0 auto; padding: 18px 16px 80px; }
+.view { animation: fade .25s ease both; }
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.page-head h1 { font-size: clamp(20px, 4.6vw, 26px); }
+.page-head p { margin: 4px 0 0; color: var(--text-soft); font-size: 13.5px; }
+
+.card { background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
+.stack { display: grid; gap: 12px; }
+.row { display: flex; align-items: center; gap: 10px; }
+.wrap { flex-wrap: wrap; }
+.grow { flex: 1; min-width: 0; }
+
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--bg-soft); color: var(--text-soft); border: 1px solid var(--line); }
+.chip.green { background: var(--green-soft); color: var(--green-strong); border-color: color-mix(in srgb, var(--green) 30%, transparent); }
+.chip.gold { background: var(--gold-soft); color: #7a5b00; border-color: color-mix(in srgb, var(--gold) 50%, transparent); }
+.chip.red { background: var(--red-soft); color: var(--red); border-color: color-mix(in srgb, var(--red) 30%, transparent); }
+.price-badge { font-family: var(--font-head); font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 999px; white-space: nowrap; background: var(--gold-soft); color: #6b4f00; border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent); }
+.price-badge.free { background: var(--green-soft); color: var(--green-strong); border-color: color-mix(in srgb, var(--green) 35%, transparent); }
+.flag { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 8px; }
+.flag.warn { background: var(--red-soft); color: var(--red); }
+.flag.ok { background: var(--green-soft); color: var(--green-strong); }
+.flag.info { background: var(--gold-soft); color: #7a5b00; }
+
+.filterbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+.seg { display: inline-flex; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 2px; flex-wrap: wrap; }
+.seg button { min-height: 38px; padding: 0 14px; border: 0; background: transparent; color: var(--text-soft); font-weight: 600; font-size: 13.5px; border-radius: 9px; display: inline-flex; align-items: center; gap: 6px; transition: background .15s, color .15s; }
+.seg button[aria-pressed="true"] { background: var(--bg-elev); color: var(--green); box-shadow: var(--shadow); }
+.seg .count { font-size: 11px; font-weight: 800; padding: 1px 7px; border-radius: 999px; background: var(--bg-soft); }
+.seg button[aria-pressed="true"] .count { background: var(--green-soft); color: var(--green-strong); }
+
+.input, .select, .textarea { width: 100%; min-height: var(--tap); padding: 10px 12px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 11px; color: var(--text); font-size: 14.5px; transition: border-color .15s, box-shadow .15s; }
+.input:hover, .select:hover, .textarea:hover { border-color: var(--line-strong); }
+.input:focus, .select:focus, .textarea:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 22%, transparent); }
+.textarea { min-height: 100px; resize: vertical; font-family: var(--font-body); }
+.search-wrap { position: relative; flex: 1; min-width: 180px; }
+.search-wrap .input { padding-left: 38px; }
+.search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-mute); pointer-events: none; }
+
+.order-card { background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px; display: grid; gap: 10px; transition: border-color .15s; }
+.order-card:hover { border-color: var(--line-strong); }
+.order-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.order-title { font-family: var(--font-head); font-weight: 700; font-size: 16px; margin: 0; }
+.order-email { font-size: 13px; color: var(--text-soft); word-break: break-all; }
+.order-amount { font-family: var(--font-head); font-weight: 800; font-size: 18px; color: var(--text); white-space: nowrap; }
+.order-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.utr-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--bg-soft); border: 1px dashed var(--line-strong); padding: 8px 10px; border-radius: 10px; }
+.utr-label { font-size: 11px; color: var(--text-mute); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+.utr-val { font-family: var(--font-mono); font-weight: 600; font-size: 15px; letter-spacing: .02em; }
+.order-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.order-actions .btn { flex: 1; min-width: 110px; }
+.order-note { font-size: 13px; color: var(--text-soft); font-style: italic; }
+.helper-line { display: flex; gap: 8px; align-items: flex-start; background: var(--gold-soft); border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent); color: #6b4f00; padding: 10px 12px; border-radius: 11px; font-size: 13px; font-weight: 600; }
+
+.app-row { background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 12px; display: grid; grid-template-columns: 48px 1fr auto; gap: 12px; align-items: center; transition: border-color .15s; }
+.app-row:hover { border-color: var(--line-strong); }
+.app-avatar { width: 48px; height: 48px; border-radius: 12px; flex: none; display: grid; place-items: center; overflow: hidden; background: var(--grad-brand); color: #fff; font-family: var(--font-head); font-weight: 800; font-size: 20px; border: 1px solid var(--line); }
+.app-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.app-main { min-width: 0; }
+.app-name { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.app-pkg { font-family: var(--font-mono); font-size: 12px; color: var(--text-soft); word-break: break-all; }
+.app-sub { font-size: 12px; color: var(--text-mute); display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.app-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.app-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.star-btn { background: transparent; border: 0; color: var(--text-mute); font-size: 18px; line-height: 1; padding: 6px; border-radius: 8px; }
+.star-btn[aria-pressed="true"] { color: var(--gold); }
+
+.switch { position: relative; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; min-height: 36px; }
+.switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.switch .track { width: 42px; height: 24px; border-radius: 999px; background: var(--line-strong); position: relative; transition: background .18s; flex: none; }
+.switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .18s; }
+.switch input:checked + .track { background: var(--green); }
+.switch input:checked + .track::after { transform: translateX(18px); }
+.switch input:focus-visible + .track { outline: 3px solid var(--focus); outline-offset: 2px; }
+.switch .sw-label { font-size: 13px; font-weight: 600; color: var(--text-soft); }
+
+.form-grid { display: grid; gap: 14px; grid-template-columns: 1fr; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field > label { font-size: 13px; font-weight: 700; color: var(--text-soft); display: flex; align-items: center; gap: 6px; }
+.field .hint { font-size: 12px; color: var(--text-mute); }
+.field .err { font-size: 12.5px; color: var(--red); font-weight: 600; display: none; }
+.field.invalid .err { display: block; }
+.field.invalid .input, .field.invalid .textarea, .field.invalid .select { border-color: var(--red); }
+.field-wide { grid-column: 1 / -1; }
+.price-input { font-family: var(--font-head); font-weight: 800; font-size: 26px; padding: 12px 14px; letter-spacing: -.01em; }
+.price-quick { display: flex; gap: 6px; flex-wrap: wrap; }
+.price-quick button { min-height: 36px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg-soft); color: var(--text-soft); font-weight: 700; font-size: 13px; }
+.price-quick button:hover { border-color: var(--gold); color: var(--text); }
+.icon-preview { width: 64px; height: 64px; border-radius: 14px; border: 1px solid var(--line); display: grid; place-items: center; background: var(--bg-soft); overflow: hidden; flex: none; color: var(--text-mute); font-size: 24px; }
+.icon-preview img { width: 100%; height: 100%; object-fit: cover; }
+.link-builder, .apk-picker { display: grid; gap: 8px; padding: 12px; border-radius: 11px; background: var(--bg-soft); border: 1px dashed var(--line-strong); }
+.apk-status { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-soft); min-height: 24px; }
+.apk-status .apk-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex: none; }
+.apk-status.error { color: var(--red); }
+.apk-status.error .apk-dot { background: var(--red); }
+.sha-hint { font-size: 12px; color: var(--text-mute); }
+
+.table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--line); background: var(--bg-elev); }
+table.data { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.data th, table.data td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.data th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-mute); background: var(--bg-soft); font-weight: 700; }
+table.data tr:last-child td { border-bottom: 0; }
+table.data td.num, table.data th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.stat-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); }
+.stat { background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); }
+.stat .k { font-size: 12px; color: var(--text-mute); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.stat .v { font-family: var(--font-head); font-weight: 800; font-size: clamp(20px, 5vw, 26px); margin-top: 4px; }
+.stat .v.gold { color: var(--gold); }
+
+.bars { display: grid; gap: 10px; }
+.bar-row { display: grid; grid-template-columns: minmax(80px, 150px) 1fr minmax(60px, auto); gap: 10px; align-items: center; font-size: 13px; }
+.bar-track { height: 14px; background: var(--bg-soft); border-radius: 999px; overflow: hidden; border: 1px solid var(--line); }
+.bar-fill { height: 100%; border-radius: 999px; background: var(--grad-brand); min-width: 4px; transition: width .5s ease; }
+.bar-val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+
+.loader-wrap { display: inline-grid; place-items: center; vertical-align: middle; }
+.loader-wrap svg { display: block; }
+.loader-wrap .spin-outer { transform-origin: 50% 50%; animation: spinCW 1.1s linear infinite; }
+.loader-wrap .spin-inner { transform-origin: 50% 50%; animation: spinCCW 1.8s linear infinite; }
+.loader-wrap .dot { transform-origin: 50% 50%; animation: breathe 1.4s ease-in-out infinite; }
+.loader-wrap .dot:nth-child(2) { animation-delay: .18s; }
+.loader-wrap .dot:nth-child(3) { animation-delay: .36s; }
+.loader-wrap .arrow { transform-origin: 50% 50%; animation: pulseArrow .9s ease-in-out infinite alternate; }
+@keyframes spinCW { to { transform: rotate(360deg); } }
+@keyframes spinCCW { to { transform: rotate(-360deg); } }
+@keyframes breathe { 0%,100% { transform: scale(.6); } 50% { transform: scale(1.15); } }
+@keyframes pulseArrow { from { transform: scale(.85); opacity: .7; } to { transform: scale(1.1); opacity: 1; } }
+.loading-block { display: grid; place-items: center; gap: 14px; padding: 40px 0; color: var(--text-soft); }
+
+.toasts { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 200; display: grid; gap: 8px; width: min(94vw, 420px); pointer-events: none; }
+.toast { pointer-events: auto; background: var(--bg-elev); color: var(--text); border: 1px solid var(--line-strong); border-left: 4px solid var(--green); border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow-lg); font-size: 14px; font-weight: 600; display: flex; align-items: flex-start; gap: 10px; animation: toastIn .25s ease both; }
+.toast.err { border-left-color: var(--red); }
+.toast.warn { border-left-color: var(--gold); }
+.toast .t-body { flex: 1; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+
+.offline-banner { position: sticky; top: 108px; z-index: 34; max-width: var(--max); margin: 0 auto; padding: 0 16px; }
+.offline-inner { display: flex; align-items: center; gap: 10px; background: var(--gold-soft); color: #6b4f00; border: 1px solid color-mix(in srgb, var(--gold) 50%, transparent); padding: 10px 14px; border-radius: 11px; font-size: 13.5px; font-weight: 700; animation: slideDown .3s ease both; }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.pulse-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--gold); flex: none; animation: blink 1.2s ease-in-out infinite; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+dialog.dlg { border: 0; padding: 0; background: transparent; color: var(--text); width: min(94vw, 460px); max-height: 90vh; }
+dialog.dlg::backdrop { background: rgba(0, 0, 0, .55); backdrop-filter: blur(3px); }
+.dlg-card { background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 20px; display: grid; gap: 14px; animation: pop .22s ease both; }
+@keyframes pop { from { opacity: 0; transform: scale(.96) translateY(6px); } to { opacity: 1; transform: none; } }
+.dlg-title { font-family: var(--font-head); font-size: 18px; font-weight: 800; }
+.dlg-msg { font-size: 14px; color: var(--text-soft); }
+.dlg-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.dlg-actions .btn { flex: 1; min-width: 120px; }
+
+.gate { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: var(--bg); background-image: var(--grad-bg); background-attachment: fixed; transition: background-color .6s ease; }
+.gate-card { width: min(440px, 100%); background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 28px; display: grid; gap: 18px; text-align: center; }
+.gate-logo { width: 64px; height: 64px; margin: 0 auto; border-radius: 18px; display: grid; place-items: center; color: #fff; font-family: var(--font-head); font-weight: 800; font-size: 26px; background: var(--grad-brand); box-shadow: var(--shadow); }
+.gate h1 { font-size: 22px; }
+.gate p { margin: 0; color: var(--text-soft); font-size: 14px; }
+.gate .notice { font-size: 13px; padding: 10px 12px; border-radius: 10px; background: var(--red-soft); color: var(--red); font-weight: 600; text-align: left; }
+.gate .notice.ok { background: var(--green-soft); color: var(--green-strong); }
+.gate-foot { font-size: 12px; color: var(--text-mute); }
+.gate-error-box { background: var(--red-soft); color: var(--red); border: 1px solid var(--red); padding: 10px; border-radius: 8px; font-family: var(--font-mono); font-size: 11px; text-align: left; word-break: break-all; display: none; margin-top: 10px; }
+
+@media (min-width: 640px) {
+  .form-grid { grid-template-columns: 1fr 1fr; }
+  .stat-grid { grid-template-columns: repeat(3, 1fr); }
+  .order-actions .btn { flex: 0 0 auto; }
+}
+@media (min-width: 900px) {
+  main { padding: 24px 20px 90px; }
+  .orders-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .order-card { height: 100%; }
+  .stat-grid { grid-template-columns: repeat(6, 1fr); }
+}
+@media (max-width: 520px) {
+  .user-chip .uc-name { display: none; }
+  .app-row { grid-template-columns: 44px 1fr; }
+  .app-right { grid-column: 1 / -1; justify-content: space-between; }
+  .app-avatar { width: 44px; height: 44px; }
+  .bar-row { grid-template-columns: minmax(70px, 1fr) 2fr minmax(50px, auto); }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="loaderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="currentColor"/>
+      <stop offset="100%" stop-color="currentColor" stop-opacity="0.6"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div id="gate" class="gate">
+  <div class="gate-card">
+    <div class="gate-logo">P</div>
+    <div>
+      <h1 id="gate-title">Premium APK Store</h1>
+      <p>Admin panel — sirf authorized email</p>
+    </div>
+    <div id="gate-notice" class="notice hidden"></div>
+    <button id="google-btn" class="btn btn-google btn-block" type="button">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Google se login
+    </button>
+    <div id="gate-error" class="gate-error-box"></div>
+    <div class="gate-foot">Sirf <span class="mono">krishna95079kr@gmail.com</span> login kar sakta hai</div>
+  </div>
+</div>
+
+<div id="shell" class="hidden">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">P</div>
+        <div style="min-width:0">
+          <div class="brand-title">Premium APK Store</div>
+          <div class="brand-sub">Admin</div>
+        </div>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div id="user-chip" class="user-chip hidden">
+        <img id="user-photo" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" />
+        <span id="user-name" class="uc-name"></span>
+      </div>
+      <div class="theme-wrap">
+        <button id="theme-btn" class="icon-btn" type="button" aria-label="Theme" title="Theme change karein">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+        <div id="theme-menu" class="theme-menu hidden" role="menu"></div>
+      </div>
+      <button id="signout-btn" class="icon-btn" type="button" aria-label="Sign out" title="Sign out">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Sections">
+    <div class="tabs-inner" id="tabs">
+      <button class="tab" data-tab="orders" type="button">Orders <span class="tab-badge" id="orders-badge">0</span></button>
+      <button class="tab" data-tab="apps" type="button">Apps</button>
+      <button class="tab" data-tab="new" type="button">Naya app</button>
+      <button class="tab" data-tab="customers" type="button">Customers</button>
+      <button class="tab" data-tab="sales" type="button">Sales</button>
+      <button class="tab" data-tab="io" type="button">Import / Export</button>
+    </div>
+  </nav>
+
+  <div id="offline-banner" class="offline-banner hidden">
+    <div class="offline-inner">
+      <span class="pulse-dot"></span>
+      Internet nahi hai — changes save nahi honge
+    </div>
+  </div>
+
+  <main id="main"></main>
+</div>
+
+<div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
+
+<dialog id="dlg" class="dlg">
+  <form method="dialog" class="dlg-card" id="dlg-form">
+    <div class="dlg-title" id="dlg-title">Confirm</div>
+    <div class="dlg-msg" id="dlg-msg"></div>
+    <div id="dlg-extra"></div>
+    <div class="dlg-actions">
+      <button type="button" id="dlg-cancel" class="btn btn-ghost">Cancel</button>
+      <button type="submit" id="dlg-ok" class="btn">OK</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInWithPopup, signInWithRedirect,
+  GoogleAuthProvider, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getDatabase, ref, onValue, get, update, push, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDazB0gpgOS3RKqURgWcG8QgL3qOpoFGdI",
+  authDomain: "apk-store-kishan-998c4.firebaseapp.com",
+  databaseURL: "https://apk-store-kishan-998c4-default-rtdb.firebaseio.com",
+  projectId: "apk-store-kishan-998c4",
+  storageBucket: "apk-store-kishan-998c4.firebasestorage.app",
+  messagingSenderId: "529479289404",
+  appId: "1:529479289404:web:ddc8f00f65fae56799d139"
+};
+const ADMIN_EMAILS = ["krishna95079kr@gmail.com"];
+const GITHUB_USER = "kishanrajhacker";
+const GITHUB_REPO = "apk-files";
+const GITHUB_TAG = "apps";
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+const isEmailAllowed = (email) => typeof email === "string" && ADMIN_EMAILS.includes(email.toLowerCase());
+const escapeText = (s) => typeof s === "string" ? s : String(s ?? "");
+
+let app, auth, db;
+const gateError = $("#gate-error");
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getDatabase(app);
+} catch (e) {
+  if (gateError) { gateError.style.display = "block"; gateError.textContent = "Firebase Init Error: " + e.message; }
+  console.error("Firebase init failed", e);
+}
+
+function normalizeObjectList(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.filter((v) => v != null);
+  if (typeof value === "object") {
+    return Object.keys(value).sort((a, b) => (Number(a) || 0) - (Number(b) || 0)).map((k) => value[k]).filter((v) => v != null);
+  }
+  return [];
+}
+function asNumber(v, fb = 0) {
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (typeof v === "string" && v.trim() !== "") { const n = Number(v); if (Number.isFinite(n)) return n; }
+  return fb;
+}
+function asBool(v, fb = false) {
+  if (typeof v === "boolean") return v;
+  if (v === "true" || v === 1 || v === "1") return true;
+  if (v === "false" || v === 0 || v === "0") return false;
+  return fb;
+}
+function formatRupees(n) { return "₹" + asNumber(n, 0).toLocaleString("en-IN"); }
+function formatDateTime(ts) {
+  if (!ts) return "—";
+  let d; try { d = new Date(ts); } catch { return "—"; }
+  if (isNaN(d.getTime())) return "—";
+  try { return d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }); } catch { return d.toISOString(); }
+}
+function cleanUndefined(obj) {
+  if (obj === undefined || obj === null) return null;
+  if (Array.isArray(obj)) { const a = obj.map(cleanUndefined); return a.length ? a : null; }
+  if (typeof obj === "object") {
+    const out = {};
+    for (const k of Object.keys(obj)) { const v = cleanUndefined(obj[k]); if (v !== undefined && v !== null) out[k] = v; }
+    return Object.keys(out).length ? out : null;
+  }
+  return obj;
+}
+
+const THEMES = [
+  { id: "emerald", name: "Emerald", swatch: "linear-gradient(135deg,#01875F,#22B4C4)" },
+  { id: "hacker", name: "Hacker", swatch: "linear-gradient(135deg,#00FF41,#00C8FF)" },
+  { id: "crystal", name: "3D Crystal", swatch: "linear-gradient(135deg,#38BDF8,#5EEAD4)" },
+  { id: "sky", name: "Akashmandal", swatch: "linear-gradient(135deg,#A78BFA,#F472B6)" },
+  { id: "ocean", name: "Samundra", swatch: "linear-gradient(135deg,#06B6D4,#22D3EE)" },
+  { id: "galaxy", name: "Galaxy", swatch: "linear-gradient(135deg,#F472B6,#A78BFA)" },
+  { id: "ember", name: "Ember", swatch: "linear-gradient(135deg,#FB923C,#EF4444)" },
+  { id: "sakura", name: "Sakura", swatch: "linear-gradient(135deg,#DB2777,#F472B6)" },
+  { id: "cyber", name: "Cyberpunk", swatch: "linear-gradient(135deg,#FACC15,#22D3EE)" },
+  { id: "sunrise", name: "Sunrise", swatch: "linear-gradient(135deg,#EA580C,#FCD34D)" }
+];
+const THEME_KEY = "premium-apk-admin-theme";
+const THEME_AUTO_KEY = "premium-apk-admin-theme-auto";
+let themeRotationTimer = null;
+let currentThemeIdx = 0;
+let autoRotate = true;
+
+function applyTheme(id) {
+  try {
+    if (!id || id === "emerald") { document.documentElement.removeAttribute("data-theme"); }
+    else { document.documentElement.setAttribute("data-theme", id); }
+    const idx = THEMES.findIndex((t) => t.id === id);
+    if (idx >= 0) currentThemeIdx = idx;
+    $$("#theme-menu button").forEach((b) => { b.setAttribute("aria-pressed", b.dataset.themeId === id ? "true" : "false"); });
+  } catch (e) {}
+}
+function setTheme(id) {
+  try { localStorage.setItem(THEME_KEY, id); localStorage.setItem(THEME_AUTO_KEY, "0"); } catch {}
+  autoRotate = false; stopThemeRotation(); applyTheme(id);
+  toast("Theme: " + (THEMES.find((t) => t.id === id)?.name || id));
+}
+function startThemeRotation() {
+  stopThemeRotation();
+  try { const s = localStorage.getItem(THEME_AUTO_KEY); if (s === "0") autoRotate = false; } catch {}
+  if (!autoRotate) return;
+  themeRotationTimer = setInterval(() => {
+    try { currentThemeIdx = (currentThemeIdx + 1) % THEMES.length; applyTheme(THEMES[currentThemeIdx].id); } catch {}
+  }, 8000);
+}
+function stopThemeRotation() { if (themeRotationTimer) { clearInterval(themeRotationTimer); themeRotationTimer = null; } }
+function buildThemeMenu() {
+  const menu = $("#theme-menu"); if (!menu) return; menu.innerHTML = "";
+  THEMES.forEach((t) => {
+    const btn = document.createElement("button");
+    btn.type = "button"; btn.dataset.themeId = t.id; btn.setAttribute("aria-pressed", "false"); btn.setAttribute("role", "menuitem");
+    const sw = document.createElement("span"); sw.className = "theme-swatch"; sw.style.background = t.swatch;
+    const label = document.createElement("span"); label.textContent = t.name;
+    btn.appendChild(sw); btn.appendChild(label);
+    btn.addEventListener("click", () => { setTheme(t.id); menu.classList.add("hidden"); });
+    menu.appendChild(btn);
+  });
+}
+(function initTheme() {
+  let saved = null; try { saved = localStorage.getItem(THEME_KEY); } catch {}
+  if (saved && THEMES.find((t) => t.id === saved)) applyTheme(saved); else applyTheme("emerald");
+  buildThemeMenu(); startThemeRotation();
+})();
+
+$("#theme-btn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const menu = $("#theme-menu"); if (!menu) return;
+  menu.classList.toggle("hidden");
+  if (!menu.classList.contains("hidden")) { const c = menu.querySelector('[aria-pressed="true"]'); if (c) c.scrollIntoView({ block: "nearest" }); }
+});
+document.addEventListener("click", (e) => {
+  const menu = $("#theme-menu"); if (!menu || menu.classList.contains("hidden")) return;
+  if (!e.target.closest(".theme-wrap")) menu.classList.add("hidden");
+});
+
+function toast(message, type = "ok", ttl = 3600) {
+  try {
+    const host = $("#toasts"); if (!host) return;
+    const el = document.createElement("div");
+    el.className = "toast" + (type === "err" ? " err" : type === "warn" ? " warn" : "");
+    const body = document.createElement("div"); body.className = "t-body"; body.textContent = message; el.appendChild(body);
+    const close = document.createElement("button"); close.type = "button"; close.textContent = "×";
+    close.style.cssText = "min-width:28px;width:28px;height:28px;border-radius:8px;background:transparent;border:0;font-size:16px;line-height:1";
+    close.setAttribute("aria-label", "Close"); close.addEventListener("click", () => el.remove());
+    el.appendChild(close); host.appendChild(el);
+    setTimeout(() => { try { el.style.opacity = "0"; el.style.transform = "translateY(8px)"; el.style.transition = "opacity .25s, transform .25s"; setTimeout(() => el.remove(), 260); } catch { el.remove(); } }, ttl);
+  } catch (e) {}
+}
+
+function createLoader(size = 40) {
+  const wrap = document.createElement("span"); wrap.className = "loader-wrap";
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("width", size); svg.setAttribute("height", size); svg.setAttribute("viewBox", "0 0 100 100");
+  const cx = 50, cy = 50, r1 = 42, start = -90, end = 180;
+  const largeArc = end - start > 180 ? 1 : 0;
+  const rad = (d) => (d * Math.PI) / 180;
+  const x1 = cx + r1 * Math.cos(rad(start)), y1 = cy + r1 * Math.sin(rad(start));
+  const x2 = cx + r1 * Math.cos(rad(end)), y2 = cy + r1 * Math.sin(rad(end));
+  const outer = document.createElementNS(ns, "path");
+  outer.setAttribute("d", `M ${x1} ${y1} A ${r1} ${r1} 0 ${largeArc} 1 ${x2} ${y2}`);
+  outer.setAttribute("fill", "none"); outer.setAttribute("stroke", "url(#loaderGrad)");
+  outer.setAttribute("stroke-width", "7"); outer.setAttribute("stroke-linecap", "round");
+  outer.classList.add("spin-outer"); svg.appendChild(outer);
+  const inner = document.createElementNS(ns, "circle");
+  inner.setAttribute("cx", cx); inner.setAttribute("cy", cy); inner.setAttribute("r", 27);
+  inner.setAttribute("fill", "none"); inner.setAttribute("stroke", "currentColor");
+  inner.setAttribute("stroke-width", "2.5"); inner.setAttribute("stroke-dasharray", "6 8"); inner.setAttribute("opacity", "0.55");
+  inner.classList.add("spin-inner"); svg.appendChild(inner);
+  for (let i = 0; i < 3; i++) {
+    const angle = (i * 120 - 90) * (Math.PI / 180);
+    const dx = cx + 36 * Math.cos(angle), dy = cy + 36 * Math.sin(angle);
+    const dot = document.createElementNS(ns, "circle");
+    dot.setAttribute("cx", dx); dot.setAttribute("cy", dy); dot.setAttribute("r", 3.4);
+    dot.setAttribute("fill", "currentColor"); dot.classList.add("dot"); svg.appendChild(dot);
+  }
+  const arrow = document.createElementNS(ns, "g"); arrow.classList.add("arrow");
+  const stem = document.createElementNS(ns, "rect");
+  stem.setAttribute("x", "48"); stem.setAttribute("y", "40"); stem.setAttribute("width", "4"); stem.setAttribute("height", "13"); stem.setAttribute("rx", "2"); stem.setAttribute("fill", "currentColor");
+  const head = document.createElementNS(ns, "path"); head.setAttribute("d", "M50 58 L43 50 L57 50 Z"); head.setAttribute("fill", "currentColor");
+  arrow.appendChild(stem); arrow.appendChild(head); svg.appendChild(arrow);
+  wrap.appendChild(svg); return wrap;
+}
+function loadingBlock(label = "Load ho raha hai...") {
+  const div = document.createElement("div"); div.className = "loading-block"; div.appendChild(createLoader(56));
+  const p = document.createElement("div"); p.textContent = label; div.appendChild(p); return div;
+}
+
+let isOnline = navigator.onLine !== false;
+function updateOnlineUI() {
+  const banner = $("#offline-banner"); if (!banner) return;
+  banner.classList.toggle("hidden", isOnline);
+  $$("[data-write]").forEach((el) => { if (el.dataset.origDisabled === undefined) el.dataset.origDisabled = el.disabled ? "1" : "0"; el.disabled = !isOnline || el.dataset.origDisabled === "1"; });
+}
+window.addEventListener("online", () => { isOnline = true; updateOnlineUI(); toast("Internet wapas aa gaya"); });
+window.addEventListener("offline", () => { isOnline = false; updateOnlineUI(); toast("Internet nahi hai — changes save nahi honge", "warn", 5000); });
+function guardOnline() { if (!isOnline) { toast("Offline hai, pehle internet aane dein", "warn"); return false; } return true; }
+
+const state = {
+  user: null, route: { name: "orders", id: null }, listeners: [],
+  paidApps: {}, premiumLinks: {}, ordersRaw: {}, purchasesRaw: {},
+  ordersLoaded: false, appsLoaded: false, purchasesLoaded: false,
+  knownPendingIds: new Set(), firstOrdersLoad: true
+};
+function clearListeners() { state.listeners.forEach((u) => { try { if (typeof u === "function") u(); } catch {} }); state.listeners = []; }
+
+const gate = $("#gate"), shell = $("#shell"), gateNotice = $("#gate-notice");
+function showGateNotice(msg, kind = "err") { if (!gateNotice) return; gateNotice.textContent = msg; gateNotice.classList.remove("hidden", "ok"); if (kind === "ok") gateNotice.classList.add("ok"); }
+function hideGateNotice() { gateNotice?.classList.add("hidden"); }
+
+async function doGoogleLogin() {
+  if (!auth) {
+    if (gateError) { gateError.style.display = "block"; gateError.textContent = "Firebase auth initialize nahi hua. Page refresh karein."; }
+    return;
+  }
+  const btn = $("#google-btn");
+  if (btn) { btn.disabled = true; btn.innerHTML = ""; btn.appendChild(createLoader(20)); const span = document.createElement("span"); span.textContent = " Login ho raha hai..."; btn.appendChild(span); }
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    await signInWithPopup(auth, provider);
+  } catch (err) {
+    const code = err?.code || "";
+    if (code === "auth/popup-blocked" || code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+      try { await signInWithRedirect(auth, new GoogleAuthProvider()); return; }
+      catch { showGateNotice("Popup block ho gaya. Browser me popup allow karein."); }
+    } else if (code === "auth/unauthorized-domain") {
+      showGateNotice("Ye domain authorized nahi hai. Firebase → Authentication → Settings → Authorized domains me is site ka domain jodein.");
+    } else if (code === "auth/operation-not-allowed") {
+      showGateNotice("Google sign-in enable nahi hai. Firebase → Authentication → Sign-in method → Google enable karein.");
+    } else {
+      showGateNotice("Login fail: " + (err?.message || "unknown error"));
+      if (gateError) { gateError.style.display = "block"; gateError.textContent = "Error Code: " + code + " | " + (err?.message || ""); }
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg> Google se login`;
+    }
+  }
+}
+
+const googleBtn = $("#google-btn");
+if (googleBtn) googleBtn.addEventListener("click", doGoogleLogin);
+
+if (auth) {
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      state.user = null; clearListeners(); shell?.classList.add("hidden"); gate?.classList.remove("hidden"); hideGateNotice(); return;
+    }
+    const email = (user.email || "").toLowerCase();
+    if (!isEmailAllowed(email)) {
+      state.user = null; clearListeners(); shell?.classList.add("hidden"); gate?.classList.remove("hidden");
+      gateNotice.innerHTML = "";
+      const t = document.createElement("div"); t.textContent = "Aap admin nahi hain"; gateNotice.appendChild(t);
+      const so = document.createElement("button"); so.type = "button"; so.className = "btn btn-ghost btn-sm"; so.style.marginTop = "10px"; so.textContent = "Sign out";
+      so.addEventListener("click", () => { try { signOut(auth); } catch {} });
+      gateNotice.appendChild(so); gateNotice.classList.remove("hidden", "ok"); return;
+    }
+    state.user = user; gate?.classList.add("hidden"); shell?.classList.remove("hidden");
+    hideGateNotice(); updateUserChip(); startListeners();
+    if (!location.hash) location.hash = "#/orders";
+    handleRoute();
+  }, (error) => {
+    console.warn("auth error", error);
+    showGateNotice("Auth error: " + (error?.message || "unknown"));
+  });
+}
+
+function updateUserChip() {
+  const chip = $("#user-chip"), nameEl = $("#user-name"), photoEl = $("#user-photo");
+  if (!state.user) { chip?.classList.add("hidden"); return; }
+  chip?.classList.remove("hidden");
+  if (nameEl) nameEl.textContent = state.user.displayName || state.user.email || "Admin";
+  if (photoEl) {
+    if (state.user.photoURL) photoEl.src = state.user.photoURL;
+    else photoEl.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><rect width='40' height='40' fill='%23bcd'/><text x='50%' y='55%' text-anchor='middle' font-size='18' fill='%23333'>A</text></svg>";
+  }
+}
+
+$("#signout-btn").addEventListener("click", async () => {
+  try { await signOut(auth); toast("Sign out ho gaya"); } catch (e) { toast("Sign out fail: " + (e?.message || ""), "err"); }
+});
+
+function startListeners() {
+  if (!db) return;
+  clearListeners();
+  try {
+    const unsub = onValue(ref(db, "orders"), (snap) => {
+      const val = snap.val() || {};
+      const prev = state.knownPendingIds; const next = new Set();
+      for (const uid of Object.keys(val)) {
+        const g = val[uid] || {};
+        for (const oid of Object.keys(g)) {
+          const o = g[oid] || {};
+          if ((o.status || "").toLowerCase() === "pending") next.add(uid + "/" + oid);
+        }
+      }
+      if (!state.firstOrdersLoad && state.ordersLoaded) {
+        let hasNew = false; next.forEach((id) => { if (!prev.has(id)) hasNew = true; });
+        if (hasNew) { toast("Naya order aaya"); beepNewOrder(); }
+      }
+      state.knownPendingIds = next; state.ordersRaw = val; state.ordersLoaded = true;
+      updateOrdersBadge();
+      if (["orders", "customers", "sales"].includes(state.route.name)) renderRoute();
+      state.firstOrdersLoad = false;
+    }, (err) => handleDbError(err, "orders"));
+    state.listeners.push(unsub);
+  } catch (e) { handleDbError(e, "orders"); }
+  try {
+    const unsub = onValue(ref(db, "paidApps"), (snap) => {
+      state.paidApps = snap.val() || {}; state.appsLoaded = true;
+      if (["apps", "new", "edit", "sales", "io"].includes(state.route.name)) renderRoute();
+    }, (err) => handleDbError(err, "paidApps"));
+    state.listeners.push(unsub);
+  } catch (e) { handleDbError(e, "paidApps"); }
+  try {
+    const unsub = onValue(ref(db, "premiumLinks"), (snap) => {
+      state.premiumLinks = snap.val() || {};
+      if (state.route.name === "edit") renderRoute();
+    }, (err) => console.warn("premiumLinks error", err));
+    state.listeners.push(unsub);
+  } catch (e) { console.warn("premiumLinks", e); }
+  try {
+    const unsub = onValue(ref(db, "purchases"), (snap) => {
+      state.purchasesRaw = snap.val() || {}; state.purchasesLoaded = true;
+      if (["customers", "sales"].includes(state.route.name)) renderRoute();
+    }, (err) => handleDbError(err, "purchases"));
+    state.listeners.push(unsub);
+  } catch (e) { handleDbError(e, "purchases"); }
+}
+function updateOrdersBadge() {
+  const badge = $("#orders-badge"); if (!badge) return;
+  let count = 0;
+  try { for (const uid of Object.keys(state.ordersRaw)) { const g = state.ordersRaw[uid] || {}; for (const oid of Object.keys(g)) { if (((g[oid] || {}).status || "").toLowerCase() === "pending") count++; } } } catch {}
+  badge.textContent = String(count); badge.style.display = count > 0 ? "" : "none";
+}
+function handleDbError(err, node) {
+  const msg = err?.message || String(err || "");
+  if (msg.toLowerCase().includes("permission")) toast("Permission denied — Rules publish karein aur sahi email se login karein", "err", 6000);
+  else toast("DB error (" + node + "): " + msg, "err", 6000);
+}
+
+function parseHash() {
+  const h = (location.hash || "#/orders").replace(/^#\/?/, "");
+  if (!h) return { name: "orders", id: null };
+  const [name, ...rest] = h.split("/");
+  return { name, id: rest.join("/") || null };
+}
+function go(name, id) {
+  const target = "#/" + name + (id ? "/" + id : "");
+  if (location.hash !== target) location.hash = target; else handleRoute();
+}
+window.addEventListener("hashchange", handleRoute);
+$("#tabs").addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-tab]"); if (!btn) return;
+  go(btn.getAttribute("data-tab"));
+});
+function handleRoute() {
+  if (!state.user) return;
+  state.route = parseHash();
+  $$("#tabs .tab").forEach((t) => {
+    t.removeAttribute("aria-current");
+    const n = t.getAttribute("data-tab");
+    if (n === state.route.name || (n === "apps" && state.route.name === "edit")) t.setAttribute("aria-current", "page");
+  });
+  renderRoute();
+}
+function renderRoute() {
+  const main = $("#main"); if (!main) return; main.innerHTML = "";
+  switch (state.route.name) {
+    case "orders": renderOrders(main); break;
+    case "apps": renderApps(main); break;
+    case "new": renderForm(main, null); break;
+    case "edit": renderForm(main, state.route.id); break;
+    case "customers": renderCustomers(main); break;
+    case "sales": renderSales(main); break;
+    case "io": renderIO(main); break;
+    default: renderOrders(main);
+  }
+  updateOnlineUI();
+}
+
+const dlg = $("#dlg"), dlgForm = $("#dlg-form"), dlgTitle = $("#dlg-title"), dlgMsg = $("#dlg-msg"), dlgExtra = $("#dlg-extra"), dlgOk = $("#dlg-ok"), dlgCancel = $("#dlg-cancel");
+let dlgResolver = null;
+function openDialog({ title, message, extra, okText = "OK", cancelText = "Cancel", danger = false }) {
+  return new Promise((resolve) => {
+    dlgResolver = resolve;
+    dlgTitle.textContent = title || "Confirm"; dlgMsg.textContent = message || "";
+    dlgExtra.innerHTML = ""; if (extra) dlgExtra.appendChild(extra);
+    dlgOk.textContent = okText; dlgOk.className = "btn " + (danger ? "btn-danger" : "");
+    dlgCancel.textContent = cancelText;
+    try { if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", ""); } catch {}
+    setTimeout(() => { try { dlgOk.focus(); } catch {} }, 30);
+  });
+}
+function closeDialog(result) {
+  try { if (dlg.open) dlg.close(); else dlg.removeAttribute("open"); } catch {}
+  if (dlgResolver) { const r = dlgResolver; dlgResolver = null; r(result); }
+}
+dlgCancel.addEventListener("click", () => closeDialog(null));
+dlgForm.addEventListener("submit", (e) => { e.preventDefault(); closeDialog(true); });
+dlg.addEventListener("cancel", (e) => { e.preventDefault(); closeDialog(null); });
+dlg.addEventListener("click", (e) => { if (e.target === dlg) closeDialog(null); });
+function confirmDialog(title, message, okText = "Haan", danger = true) { return openDialog({ title, message, okText, danger }).then((v) => v === true); }
+async function confirmDeleteApp(appName) {
+  const extra = document.createElement("div"); extra.style.cssText = "display:grid;gap:8px";
+  const p = document.createElement("p"); p.style.cssText = "margin:0;font-size:13.5px;color:var(--text-soft)"; p.textContent = `App: ${appName}. Type "Haan, hatao":`;
+  const inp = document.createElement("input"); inp.className = "input"; inp.placeholder = "Haan, hatao";
+  extra.appendChild(p); extra.appendChild(inp);
+  const ok = await openDialog({ title: "App delete karein?", message: "Ye app aur iska premium link dono delete honge. Orders/purchases safe rahenge.", extra, okText: "Delete karein", danger: true });
+  if (!ok) return false;
+  if ((inp.value || "").trim().toLowerCase() !== "haan, hatao") { toast("Confirm nahi mila — delete nahi hua", "warn"); return false; }
+  return true;
+}
+
+function beepNewOrder() {
+  try {
+    const C = window.AudioContext || window.webkitAudioContext; if (!C) return;
+    const ctx = new C(); const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type = "sine"; o.frequency.setValueAtTime(880, ctx.currentTime); o.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.12);
+    g.gain.setValueAtTime(0.001, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+    o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.3);
+  } catch {}
+}
+
+function collectOrders() {
+  const list = [];
+  try {
+    for (const uid of Object.keys(state.ordersRaw)) {
+      const g = state.ordersRaw[uid] || {};
+      for (const oid of Object.keys(g)) {
+        const o = g[oid] || {};
+        list.push({ uid, orderId: oid, email: escapeText(o.email || ""), appId: escapeText(o.appId || ""), appName: escapeText(o.appName || ""), amount: asNumber(o.amount, 0), utr: escapeText(o.utr || ""), status: (escapeText(o.status || "pending")).toLowerCase(), createdAt: o.createdAt, note: escapeText(o.note || ""), approvedAt: o.approvedAt });
+      }
+    }
+  } catch {}
+  list.sort((a, b) => { const ta = typeof a.createdAt === "number" ? a.createdAt : 0; const tb = typeof b.createdAt === "number" ? b.createdAt : 0; return tb - ta; });
+  return list;
+}
+function utrDuplicateSet(orders) {
+  const map = new Map(); for (const o of orders) { if (o.utr) map.set(o.utr, (map.get(o.utr) || 0) + 1); }
+  const dup = new Set(); for (const [k, v] of map) if (v > 1) dup.add(k); return dup;
+}
+let ordersFilter = "pending";
+function renderOrders(root) {
+  const orders = collectOrders(); const dupSet = utrDuplicateSet(orders);
+  const head = document.createElement("div"); head.className = "page-head";
+  const h = document.createElement("div"); const h1 = document.createElement("h1"); h1.textContent = "Orders";
+  const p = document.createElement("p"); p.textContent = "Pehle apne UPI/bank app me UTR aur amount check karein, phir Approve karein.";
+  h.appendChild(h1); h.appendChild(p); head.appendChild(h); root.appendChild(head);
+  const counts = { pending: 0, approved: 0, rejected: 0 };
+  for (const o of orders) { if (o.status === "pending") counts.pending++; else if (o.status === "approved") counts.approved++; else if (o.status === "rejected" || o.status === "revoked") counts.rejected++; }
+  const filterBar = document.createElement("div"); filterBar.className = "filterbar";
+  const seg = document.createElement("div"); seg.className = "seg";
+  [ { key: "pending", label: "Pending", count: counts.pending }, { key: "approved", label: "Approved", count: counts.approved }, { key: "rejected", label: "Rejected", count: counts.rejected } ].forEach((d) => {
+    const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", ordersFilter === d.key ? "true" : "false"); b.dataset.filter = d.key;
+    b.textContent = d.label + " "; const c = document.createElement("span"); c.className = "count"; c.textContent = String(d.count);
+    b.appendChild(c); b.addEventListener("click", () => { ordersFilter = d.key; renderRoute(); }); seg.appendChild(b);
+  });
+  filterBar.appendChild(seg); root.appendChild(filterBar);
+  let filtered = orders;
+  if (ordersFilter === "pending") filtered = orders.filter((o) => o.status === "pending");
+  else if (ordersFilter === "approved") filtered = orders.filter((o) => o.status === "approved");
+  else filtered = orders.filter((o) => o.status === "rejected" || o.status === "revoked");
+  if (!state.ordersLoaded) { root.appendChild(loadingBlock("Orders load ho rahe hain...")); return; }
+  if (!filtered.length) {
+    const empty = document.createElement("div"); empty.className = "card"; empty.style.cssText = "text-align:center;color:var(--text-soft);padding:32px 16px"; empty.textContent = "Abhi koi order nahi"; root.appendChild(empty); return;
+  }
+  const grid = document.createElement("div"); grid.className = "orders-grid"; grid.style.cssText = "display:grid;gap:12px";
+  filtered.forEach((o) => grid.appendChild(orderCard(o, dupSet))); root.appendChild(grid);
+}
+function orderCard(o, dupSet) {
+  const card = document.createElement("div"); card.className = "order-card";
+  const app = state.paidApps[o.appId]; const currentPrice = app ? asNumber(app.price, 0) : null;
+  const top = document.createElement("div"); top.className = "order-top";
+  const left = document.createElement("div"); const title = document.createElement("h3"); title.className = "order-title"; title.textContent = o.appName || o.appId || "App";
+  const email = document.createElement("div"); email.className = "order-email"; email.textContent = o.email || o.uid;
+  left.appendChild(title); left.appendChild(email);
+  const right = document.createElement("div"); right.style.textAlign = "right";
+  const amt = document.createElement("div"); amt.className = "order-amount"; amt.textContent = formatRupees(o.amount); right.appendChild(amt);
+  if (currentPrice !== null) {
+    const pl = document.createElement("div"); pl.style.fontSize = "12px"; pl.style.color = "var(--text-mute)"; pl.textContent = "Current: " + formatRupees(currentPrice); right.appendChild(pl);
+  }
+  top.appendChild(left); top.appendChild(right); card.appendChild(top);
+  const meta = document.createElement("div"); meta.className = "order-meta";
+  const sc = document.createElement("span"); sc.className = "chip " + (o.status === "approved" ? "green" : o.status === "pending" ? "gold" : "red"); sc.textContent = o.status; meta.appendChild(sc);
+  if (currentPrice !== null) {
+    if (o.amount < currentPrice) { const f = document.createElement("span"); f.className = "flag warn"; f.textContent = "Amount price se kam hai"; meta.appendChild(f); }
+    else { const f = document.createElement("span"); f.className = "flag ok"; f.textContent = "✓ Amount sahi"; meta.appendChild(f); }
+  }
+  if (o.utr && dupSet.has(o.utr)) { const f = document.createElement("span"); f.className = "flag info"; f.textContent = "Ye UTR pehle bhi use hua hai"; meta.appendChild(f); }
+  card.appendChild(meta);
+  if (o.utr) {
+    const ur = document.createElement("div"); ur.className = "utr-row";
+    const lab = document.createElement("span"); lab.className = "utr-label"; lab.textContent = "UTR";
+    const val = document.createElement("span"); val.className = "utr-val"; val.textContent = o.utr;
+    const cp = document.createElement("button"); cp.type = "button"; cp.className = "btn btn-ghost btn-sm"; cp.textContent = "Copy";
+    cp.addEventListener("click", async () => { try { await navigator.clipboard.writeText(o.utr); toast("UTR copy ho gaya"); } catch { toast("Copy fail", "err"); } });
+    ur.appendChild(lab); ur.appendChild(val); ur.appendChild(cp); card.appendChild(ur);
+  }
+  const d = document.createElement("div"); d.className = "muted"; d.style.fontSize = "12.5px"; d.textContent = "Date: " + formatDateTime(o.createdAt); card.appendChild(d);
+  if (o.note) { const n = document.createElement("div"); n.className = "order-note"; n.textContent = "Note: " + o.note; card.appendChild(n); }
+  const actions = document.createElement("div"); actions.className = "order-actions";
+  if (o.status === "pending") {
+    const a = document.createElement("button"); a.type = "button"; a.className = "btn"; a.dataset.write = "1"; a.textContent = "Approve"; a.addEventListener("click", () => approveOrder(o, a));
+    const r = document.createElement("button"); r.type = "button"; r.className = "btn btn-danger-ghost"; r.dataset.write = "1"; r.textContent = "Reject"; r.addEventListener("click", () => rejectOrder(o));
+    actions.appendChild(a); actions.appendChild(r);
+  } else if (o.status === "approved") {
+    const rv = document.createElement("button"); rv.type = "button"; rv.className = "btn btn-danger-ghost"; rv.dataset.write = "1"; rv.textContent = "Revoke"; rv.addEventListener("click", () => revokeOrder(o));
+    actions.appendChild(rv);
+  }
+  if (actions.children.length) card.appendChild(actions);
+  return card;
+}
+async function approveOrder(o, btn) {
+  if (!guardOnline()) return;
+  btn.disabled = true; const orig = btn.textContent; btn.textContent = ""; btn.appendChild(createLoader(18)); btn.appendChild(document.createTextNode(" Approving..."));
+  try {
+    const updates = {
+      ["orders/" + o.uid + "/" + o.orderId + "/status"]: "approved",
+      ["orders/" + o.uid + "/" + o.orderId + "/approvedAt"]: serverTimestamp(),
+      ["purchases/" + o.uid + "/" + o.appId]: { orderId: o.orderId, amount: o.amount, approvedAt: serverTimestamp() }
+    };
+    const clean = cleanUndefined(updates); if (!clean) throw new Error("Invalid update");
+    await update(ref(db), clean); toast("Approve ho gaya, user ke liye app unlock");
+  } catch (e) { toast("Approve fail: " + (e?.message || ""), "err"); btn.disabled = false; btn.textContent = orig; }
+}
+async function rejectOrder(o) {
+  if (!guardOnline()) return;
+  const extra = document.createElement("textarea"); extra.className = "textarea"; extra.placeholder = "Reason (optional)"; extra.style.minHeight = "80px";
+  const ok = await openDialog({ title: "Order reject karein?", message: "Optional reason likh sakte hain.", extra, okText: "Reject karein", danger: true });
+  if (!ok) return;
+  const note = (extra.value || "").trim();
+  try {
+    const updates = { ["orders/" + o.uid + "/" + o.orderId + "/status"]: "rejected" };
+    if (note) updates["orders/" + o.uid + "/" + o.orderId + "/note"] = note;
+    await update(ref(db), cleanUndefined(updates) || updates); toast("Order reject ho gaya");
+  } catch (e) { toast("Reject fail: " + (e?.message || ""), "err"); }
+}
+async function revokeOrder(o) {
+  if (!guardOnline()) return;
+  const ok = await confirmDialog("Revoke access?", "User ka access turant band ho jayega.", "Revoke karein", true);
+  if (!ok) return;
+  try {
+    await update(ref(db), { ["orders/" + o.uid + "/" + o.orderId + "/status"]: "revoked", ["purchases/" + o.uid + "/" + o.appId]: null });
+    toast("Access revoke ho gaya");
+  } catch (e) { toast("Revoke fail: " + (e?.message || ""), "err"); }
+}
+
+let appsSearch = "", appsFilter = "all", appsSort = "newest";
+function renderApps(root) {
+  const head = document.createElement("div"); head.className = "page-head";
+  const h = document.createElement("div"); const h1 = document.createElement("h1"); h1.textContent = "Apps";
+  const p = document.createElement("p"); p.textContent = "Premium APK Store ke paid apps manage karein.";
+  h.appendChild(h1); h.appendChild(p); head.appendChild(h);
+  const addBtn = document.createElement("button"); addBtn.type = "button"; addBtn.className = "btn"; addBtn.textContent = "+ Naya app"; addBtn.addEventListener("click", () => go("new")); head.appendChild(addBtn); root.appendChild(head);
+  const apps = Object.keys(state.paidApps).map((id) => ({ id, ...(state.paidApps[id] || {}) }));
+  const total = apps.length; const freeCount = apps.filter((a) => asNumber(a.price, 0) === 0).length; const paidCount = total - freeCount; const hiddenCount = apps.filter((a) => !asBool(a.published, true)).length;
+  const summary = document.createElement("div"); summary.className = "row wrap"; summary.style.marginBottom = "14px";
+  [ { label: "Total: " + total, cls: "" }, { label: "Free: " + freeCount, cls: "green" }, { label: "Paid: " + paidCount, cls: "gold" }, { label: "Hidden: " + hiddenCount, cls: "red" } ].forEach((c) => {
+    const s = document.createElement("span"); s.className = "chip " + c.cls; s.textContent = c.label; summary.appendChild(s);
+  });
+  root.appendChild(summary);
+  const bar = document.createElement("div"); bar.className = "filterbar";
+  const sw = document.createElement("div"); sw.className = "search-wrap"; sw.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`;
+  const sInp = document.createElement("input"); sInp.className = "input"; sInp.placeholder = "Search naam / package / publisher"; sInp.value = appsSearch;
+  sInp.addEventListener("input", () => { appsSearch = sInp.value; renderRoute(); }); sw.appendChild(sInp); bar.appendChild(sw);
+  const seg = document.createElement("div"); seg.className = "seg";
+  [ { k: "all", l: "All" }, { k: "free", l: "Free" }, { k: "paid", l: "Paid" }, { k: "published", l: "Published" }, { k: "hidden", l: "Hidden" } ].forEach((f) => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = f.l; b.setAttribute("aria-pressed", appsFilter === f.k ? "true" : "false");
+    b.addEventListener("click", () => { appsFilter = f.k; renderRoute(); }); seg.appendChild(b);
+  });
+  bar.appendChild(seg);
+  const sel = document.createElement("select"); sel.className = "select"; sel.style.maxWidth = "200px";
+  sel.innerHTML = `<option value="newest">Newest</option><option value="az">A-Z</option><option value="priceDesc">Price high to low</option>`; sel.value = appsSort;
+  sel.addEventListener("change", () => { appsSort = sel.value; renderRoute(); }); bar.appendChild(sel); root.appendChild(bar);
+  if (!state.appsLoaded) { root.appendChild(loadingBlock("Apps load ho rahe hain...")); return; }
+  let list = apps.slice(); const q = appsSearch.trim().toLowerCase();
+  if (q) { list = list.filter((a) => escapeText(a.name).toLowerCase().includes(q) || escapeText(a.packageName).toLowerCase().includes(q) || escapeText(a.publisher).toLowerCase().includes(q)); }
+  if (appsFilter === "free") list = list.filter((a) => asNumber(a.price, 0) === 0);
+  else if (appsFilter === "paid") list = list.filter((a) => asNumber(a.price, 0) > 0);
+  else if (appsFilter === "published") list = list.filter((a) => asBool(a.published, true));
+  else if (appsFilter === "hidden") list = list.filter((a) => !asBool(a.published, true));
+  if (appsSort === "az") list.sort((a, b) => escapeText(a.name).localeCompare(escapeText(b.name)));
+  else if (appsSort === "priceDesc") list.sort((a, b) => asNumber(b.price, 0) - asNumber(a.price, 0));
+  else list.sort((a, b) => { const ta = typeof a.createdAt === "number" ? a.createdAt : 0; const tb = typeof b.createdAt === "number" ? b.createdAt : 0; return tb - ta; });
+  if (!list.length) {
+    const empty = document.createElement("div"); empty.className = "card"; empty.style.cssText = "text-align:center;color:var(--text-soft);padding:32px 16px";
+    empty.textContent = total === 0 ? "Abhi koi app nahi. 'Naya app' se pehla app jodein" : "Koi app match nahi hua"; root.appendChild(empty); return;
+  }
+  const stack = document.createElement("div"); stack.className = "stack";
+  list.forEach((a) => stack.appendChild(appRow(a))); root.appendChild(stack);
+}
+function appRow(a) {
+  const row = document.createElement("div"); row.className = "app-row";
+  const av = document.createElement("div"); av.className = "app-avatar"; const initial = escapeText(a.name || "?").trim().charAt(0).toUpperCase() || "?";
+  if (a.icon && /^https:\/\//i.test(a.icon)) { const img = document.createElement("img"); img.src = a.icon; img.alt = ""; img.loading = "lazy"; img.addEventListener("error", () => { img.remove(); av.textContent = initial; }); av.appendChild(img); }
+  else { av.textContent = initial; }
+  row.appendChild(av);
+  const main = document.createElement("div"); main.className = "app-main";
+  const nl = document.createElement("div"); nl.className = "app-name"; nl.textContent = escapeText(a.name || "(no name)");
+  if (asBool(a.featured, false)) { const s = document.createElement("span"); s.className = "chip gold"; s.textContent = "★ Featured"; nl.appendChild(s); }
+  if (!asBool(a.published, true)) { const h = document.createElement("span"); h.className = "chip red"; h.textContent = "Hidden"; nl.appendChild(h); }
+  main.appendChild(nl);
+  const pkg = document.createElement("div"); pkg.className = "app-pkg"; pkg.textContent = escapeText(a.packageName || "—"); main.appendChild(pkg);
+  const sub = document.createElement("div"); sub.className = "app-sub"; const parts = [];
+  if (a.version) parts.push("v" + escapeText(a.version)); if (a.versionCode) parts.push("code " + asNumber(a.versionCode, 0)); if (a.size) parts.push(escapeText(a.size));
+  sub.textContent = parts.join(" · "); main.appendChild(sub); row.appendChild(main);
+  const right = document.createElement("div"); right.className = "app-right";
+  const pb = document.createElement("span"); const pr = asNumber(a.price, 0); pb.className = "price-badge" + (pr === 0 ? " free" : ""); pb.textContent = pr === 0 ? "Free" : formatRupees(pr); right.appendChild(pb);
+  const swLabel = document.createElement("label"); swLabel.className = "switch";
+  const swInput = document.createElement("input"); swInput.type = "checkbox"; swInput.checked = asBool(a.published, true); swInput.dataset.write = "1";
+  const track = document.createElement("span"); track.className = "track";
+  const swText = document.createElement("span"); swText.className = "sw-label"; swText.textContent = swInput.checked ? "Published" : "Hidden";
+  swInput.addEventListener("change", () => { swText.textContent = swInput.checked ? "Published" : "Hidden"; togglePublished(a, swInput); });
+  swLabel.appendChild(swInput); swLabel.appendChild(track); swLabel.appendChild(swText); right.appendChild(swLabel);
+  const starBtn = document.createElement("button"); starBtn.type = "button"; starBtn.className = "star-btn"; starBtn.dataset.write = "1"; starBtn.setAttribute("aria-pressed", asBool(a.featured, false) ? "true" : "false"); starBtn.title = "Featured toggle"; starBtn.textContent = "★"; starBtn.addEventListener("click", () => toggleFeatured(a, starBtn)); right.appendChild(starBtn);
+  const actions = document.createElement("div"); actions.className = "app-actions";
+  const eb = document.createElement("button"); eb.type = "button"; eb.className = "btn btn-ghost btn-sm"; eb.textContent = "Edit"; eb.addEventListener("click", () => go("edit", a.id));
+  const nb = document.createElement("button"); nb.type = "button"; nb.className = "btn btn-ghost btn-sm"; nb.textContent = "Naya version"; nb.addEventListener("click", () => { try { sessionStorage.setItem("apk-new-version-banner", a.id); } catch {} go("edit", a.id); });
+  const db2 = document.createElement("button"); db2.type = "button"; db2.className = "btn btn-danger-ghost btn-sm"; db2.dataset.write = "1"; db2.textContent = "Delete"; db2.addEventListener("click", () => deleteApp(a));
+  actions.appendChild(eb); actions.appendChild(nb); actions.appendChild(db2); right.appendChild(actions); row.appendChild(right); return row;
+}
+async function togglePublished(a, input) {
+  if (!guardOnline()) { input.checked = !input.checked; return; }
+  const target = input.checked; input.disabled = true;
+  try { await update(ref(db, "paidApps/" + a.id), { published: target, updatedAt: serverTimestamp() }); toast(target ? "App published" : "App hidden"); }
+  catch (e) { input.checked = !target; toast("Update fail: " + (e?.message || ""), "err"); } finally { input.disabled = false; }
+}
+async function toggleFeatured(a, btn) {
+  if (!guardOnline()) return;
+  const target = btn.getAttribute("aria-pressed") !== "true"; btn.setAttribute("aria-pressed", target ? "true" : "false");
+  try { await update(ref(db, "paidApps/" + a.id), { featured: target, updatedAt: serverTimestamp() }); toast(target ? "Featured ON" : "Featured OFF"); }
+  catch (e) { btn.setAttribute("aria-pressed", target ? "false" : "true"); toast("Update fail: " + (e?.message || ""), "err"); }
+}
+async function deleteApp(a) {
+  if (!guardOnline()) return;
+  const ok = await confirmDeleteApp(escapeText(a.name || a.id)); if (!ok) return;
+  try { await update(ref(db), { ["paidApps/" + a.id]: null, ["premiumLinks/" + a.id]: null }); toast("App delete ho gaya"); go("apps"); }
+  catch (e) { toast("Delete fail: " + (e?.message || ""), "err"); }
+}
+
+function categoriesList() {
+  const set = new Set(["Game", "Social", "Tool"]);
+  Object.values(state.paidApps).forEach((a) => { if (a && a.category) set.add(escapeText(a.category)); });
+  return Array.from(set);
+}
+function fieldWrap(labelText, inputEl, hintText) {
+  const f = document.createElement("div"); f.className = "field";
+  const l = document.createElement("label"); l.textContent = labelText; f.appendChild(l); f.appendChild(inputEl);
+  if (hintText) { const h = document.createElement("div"); h.className = "hint"; h.textContent = hintText; f.appendChild(h); }
+  const err = document.createElement("div"); err.className = "err"; f.appendChild(err); return f;
+}
+function makeInput(opts = {}) {
+  const inp = document.createElement("input"); inp.className = "input"; inp.type = opts.type || "text";
+  if (opts.placeholder) inp.placeholder = opts.placeholder; if (opts.value != null) inp.value = opts.value;
+  if (opts.min != null) inp.min = String(opts.min); if (opts.max != null) inp.max = String(opts.max);
+  if (opts.step != null) inp.step = String(opts.step); if (opts.inputmode) inp.setAttribute("inputmode", opts.inputmode);
+  return inp;
+}
+function makeTextarea(opts = {}) {
+  const t = document.createElement("textarea"); t.className = "textarea";
+  if (opts.placeholder) t.placeholder = opts.placeholder; if (opts.value != null) t.value = opts.value; if (opts.rows) t.rows = opts.rows; return t;
+}
+function capitalize(s) { if (!s) return s; return s.charAt(0).toUpperCase() + s.slice(1); }
+function formatSize(bytes) {
+  const b = Number(bytes) || 0; if (b < 1024) return b + " B"; if (b < 1024 * 1024) return (b / 1024).toFixed(1) + " KB";
+  if (b < 1024 * 1024 * 1024) return (b / (1024 * 1024)).toFixed(1) + " MB"; return (b / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+}
+
+function renderForm(root, editId) {
+  const isEdit = Boolean(editId);
+  const existingData = isEdit ? state.paidApps[editId] : null;
+  const existing = existingData ? { ...existingData, id: editId } : { id: editId };
+  const existingLink = isEdit ? state.premiumLinks[editId] || {} : {};
+  const head = document.createElement("div"); head.className = "page-head";
+  const h = document.createElement("div"); const h1 = document.createElement("h1"); h1.textContent = isEdit ? "App edit karein" : "Naya app";
+  const p = document.createElement("p"); p.textContent = isEdit ? "Save karne par paidApps + premiumLinks update honge." : "Paid app add karein. Price 0 = free.";
+  h.appendChild(h1); h.appendChild(p); head.appendChild(h);
+  const back = document.createElement("button"); back.type = "button"; back.className = "btn btn-ghost"; back.textContent = "← Apps"; back.addEventListener("click", () => go("apps")); head.appendChild(back); root.appendChild(head);
+  if (isEdit) { try { if (sessionStorage.getItem("apk-new-version-banner") === editId) { const banner = document.createElement("div"); banner.className = "helper-line"; banner.style.marginBottom = "12px"; banner.textContent = "Naya version: versionCode badhayein aur apkUrl naya daalein."; root.appendChild(banner); sessionStorage.removeItem("apk-new-version-banner"); } } catch {} }
+  const form = document.createElement("form"); form.className = "card"; form.noValidate = true;
+  const grid = document.createElement("div"); grid.className = "form-grid"; form.appendChild(grid);
+  const nameInp = makeInput({ placeholder: "App ka naam", value: escapeText(existing.name || "") }); nameInp.required = true;
+  const nameField = fieldWrap("Name *", nameInp);
+  const pkgInp = makeInput({ placeholder: "com.example.app", value: escapeText(existing.packageName || "") });
+  const pkgField = fieldWrap("Package name *", pkgInp, "Pattern: com.example.app");
+  const vcInp = makeInput({ type: "number", min: 1, step: 1, value: existing.versionCode != null ? String(existing.versionCode) : "", inputmode: "numeric" });
+  const vcField = fieldWrap("Version code *", vcInp, "Integer ≥ 1");
+  const verInp = makeInput({ placeholder: "1.0.0", value: escapeText(existing.version || "") });
+  const verField = fieldWrap("Version (versionName)", verInp);
+  const sizeInp = makeInput({ placeholder: "26.9 MB", value: escapeText(existing.size || "") });
+  const sizeField = fieldWrap("Size", sizeInp);
+  const sizeBytesInp = makeInput({ type: "number", min: 0, step: 1, value: existing.sizeBytes != null ? String(existing.sizeBytes) : "", inputmode: "numeric" });
+  const sizeBytesField = fieldWrap("Size (bytes)", sizeBytesInp, "Optional, auto-fill se aata hai");
+  const catInp = makeInput({ placeholder: "Game", value: escapeText(existing.category || "") }); catInp.setAttribute("list", "cat-list");
+  const datalist = document.createElement("datalist"); datalist.id = "cat-list";
+  categoriesList().forEach((c) => { const o = document.createElement("option"); o.value = c; datalist.appendChild(o); });
+  const catField = fieldWrap("Category", catInp); catField.appendChild(datalist);
+  const pubInp = makeInput({ placeholder: "Publisher", value: escapeText(existing.publisher || "") });
+  const pubField = fieldWrap("Publisher", pubInp);
+  const ratingInp = makeInput({ type: "number", min: 0, max: 5, step: "0.1", value: existing.rating != null ? String(existing.rating) : "", inputmode: "decimal" });
+  const ratingField = fieldWrap("Rating (0–5)", ratingInp);
+  const dlInp = makeInput({ placeholder: "1K+", value: escapeText(existing.downloads || "") });
+  const dlField = fieldWrap("Downloads (text)", dlInp);
+  const priceInp = makeInput({ type: "number", min: 0, step: 1, value: existing.price != null ? String(existing.price) : "0", inputmode: "numeric" }); priceInp.classList.add("price-input");
+  const priceField = fieldWrap("Price (₹) — 0 matlab free", priceInp);
+  const quick = document.createElement("div"); quick.className = "price-quick";
+  [0, 19, 49, 99, 199, 499].forEach((v) => { const b = document.createElement("button"); b.type = "button"; b.textContent = v === 0 ? "Free" : "₹" + v; b.addEventListener("click", () => { priceInp.value = String(v); }); quick.appendChild(b); });
+  priceField.appendChild(quick); priceField.classList.add("field-wide");
+  const iconInp = makeInput({ placeholder: "https://...", value: escapeText(existing.icon || ""), inputmode: "url" });
+  const iconField = fieldWrap("Icon URL (https)", iconInp);
+  const iconPrev = document.createElement("div"); iconPrev.className = "icon-preview"; iconPrev.textContent = "?";
+  const updateIconPrev = () => {
+    const v = iconInp.value.trim(); iconPrev.innerHTML = "";
+    if (/^https:\/\//i.test(v)) { const img = document.createElement("img"); img.src = v; img.alt = ""; img.addEventListener("error", () => { iconPrev.innerHTML = ""; iconPrev.textContent = "?"; }); iconPrev.appendChild(img); }
+    else { iconPrev.textContent = "?"; }
+  };
+  iconInp.addEventListener("input", updateIconPrev); updateIconPrev();
+  const iconRow = document.createElement("div"); iconRow.className = "row"; iconRow.style.gap = "10px"; iconRow.appendChild(iconPrev);
+  const iconGrow = document.createElement("div"); iconGrow.className = "grow"; iconGrow.appendChild(iconInp); iconRow.appendChild(iconGrow);
+  iconField.insertBefore(iconRow, iconField.querySelector(".hint") || iconField.querySelector(".err")); iconField.classList.add("field-wide");
+  const apkUrlInp = makeInput({ placeholder: "https://github.com/.../releases/download/apps/file.apk", value: escapeText(existingLink.apkUrl || ""), inputmode: "url" });
+  const apkUrlField = fieldWrap("APK URL (https) *", apkUrlInp, "GitHub Release ka direct download link");
+  const linkBuilder = document.createElement("div"); linkBuilder.className = "link-builder";
+  const fileInp = makeInput({ placeholder: "app-v1.0.apk" });
+  const buildBtn = document.createElement("button"); buildBtn.type = "button"; buildBtn.className = "btn btn-ghost btn-sm"; buildBtn.textContent = "Link banayein";
+  buildBtn.addEventListener("click", () => {
+    const fn = fileInp.value.trim(); if (!fn) { toast("File name daalein", "warn"); return; }
+    apkUrlInp.value = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${GITHUB_TAG}/${encodeURIComponent(fn)}`; toast("apkUrl bhar gaya");
+  });
+  const testBtn = document.createElement("button"); testBtn.type = "button"; testBtn.className = "btn btn-ghost btn-sm"; testBtn.textContent = "Link test karein";
+  testBtn.addEventListener("click", () => {
+    const url = apkUrlInp.value.trim(); if (!/^https:\/\//i.test(url)) { toast("Pehle valid https apkUrl daalein", "warn"); return; }
+    try { window.open(url, "_blank", "noopener,noreferrer"); } catch { toast("Link open nahi hua", "err"); }
+    toast("File seedhi download honi chahiye, koi page nahi khulna chahiye", "ok", 5000);
+  });
+  const bRow = document.createElement("div"); bRow.className = "row wrap"; bRow.appendChild(fileInp); bRow.appendChild(buildBtn); bRow.appendChild(testBtn); linkBuilder.appendChild(bRow);
+  const note = document.createElement("div"); note.className = "hint"; note.textContent = "File seedhi download honi chahiye, koi page nahi khulna chahiye."; linkBuilder.appendChild(note);
+  apkUrlField.appendChild(linkBuilder); apkUrlField.classList.add("field-wide");
+  const picker = document.createElement("div"); picker.className = "apk-picker";
+  const pickerLabel = document.createElement("div"); pickerLabel.style.cssText = "font-weight:700;font-size:13px"; pickerLabel.textContent = "APK file (optional – auto-fill ke liye)";
+  const fileInput = document.createElement("input"); fileInput.type = "file"; fileInput.accept = ".apk,application/vnd.android.package-archive"; fileInput.className = "input"; fileInput.style.padding = "8px";
+  const apkStatus = document.createElement("div"); apkStatus.className = "apk-status";
+  const apkDot = document.createElement("span"); apkDot.className = "apk-dot"; apkStatus.appendChild(apkDot);
+  const apkStatusText = document.createElement("span"); apkStatusText.textContent = "APK chunne par size/package/version auto-fill ho sakta hai."; apkStatus.appendChild(apkStatusText);
+  const shaHint = document.createElement("div"); shaHint.className = "sha-hint"; shaHint.textContent = "sha256 bade file ke liye optional hai.";
+  picker.appendChild(pickerLabel); picker.appendChild(fileInput); picker.appendChild(apkStatus); picker.appendChild(shaHint); form.appendChild(picker);
+  let autoFillToken = 0;
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files && fileInput.files[0]; if (!file) return;
+    const token = ++autoFillToken; apkStatus.classList.remove("error"); apkStatus.textContent = "";
+    const loader = createLoader(18); apkStatus.appendChild(loader);
+    const sp = document.createElement("span"); sp.textContent = "APK padh rahe hain..."; apkStatus.appendChild(sp);
+    try {
+      const info = await readApkInfo(file); if (token !== autoFillToken) return;
+      if (!pkgInp.value && info.packageName) pkgInp.value = info.packageName;
+      if (!vcInp.value && info.versionCode) vcInp.value = String(info.versionCode);
+      if (!verInp.value && info.versionName) verInp.value = info.versionName;
+      if (!sizeInp.value && file.size) sizeInp.value = formatSize(file.size);
+      if (!sizeBytesInp.value) sizeBytesInp.value = String(file.size);
+      if (!nameInp.value && info.packageName) { const last = info.packageName.split(".").filter(Boolean).pop() || ""; nameInp.placeholder = last ? capitalize(last) : "App ka naam"; }
+      apkStatus.textContent = ""; const ok = document.createElement("span"); ok.className = "apk-dot"; apkStatus.appendChild(ok);
+      const t = document.createElement("span"); t.textContent = `Package: ${info.packageName || "?"} · versionCode: ${info.versionCode || "?"} · versionName: ${info.versionName || "?"}`; apkStatus.appendChild(t);
+      if (file.size <= 150 * 1024 * 1024) {
+        try {
+          shaHint.textContent = "sha256 nikaal rahe hain...";
+          const buf = await file.arrayBuffer(); if (token !== autoFillToken) return;
+          const dig = await crypto.subtle.digest("SHA-256", buf);
+          const hex = Array.from(new Uint8Array(dig)).map((b) => b.toString(16).padStart(2, "0")).join("");
+          if (shaInp && !shaInp.value) shaInp.value = hex;
+          shaHint.textContent = "SHA-256 auto-fill ho gaya.";
+        } catch { shaHint.textContent = "sha256 bada file ke liye optional hai."; }
+      } else { shaHint.textContent = "sha256 bade file ke liye PC par `sha256sum file.apk` chalayein, ya khali chhod dein."; }
+    } catch (e) {
+      if (token !== autoFillToken) return;
+      apkStatus.classList.add("error"); apkStatus.textContent = "";
+      const dot = document.createElement("span"); dot.className = "apk-dot"; apkStatus.appendChild(dot);
+      const t = document.createElement("span"); t.textContent = "Auto-fill nahi ho paya: " + (e?.message || "unknown") + ". Manually bharein."; apkStatus.appendChild(t);
+    }
+  });
+  const shaInp = makeInput({ placeholder: "lowercase 64 hex (optional)", value: escapeText(existingLink.sha256 || "") }); shaInp.name = "sha256";
+  const shaField = fieldWrap("SHA-256 (optional)", shaInp); shaField.classList.add("field-wide");
+  const descInp = makeTextarea({ value: escapeText(existing.description || ""), rows: 2 }); const descField = fieldWrap("Short description", descInp);
+  const fullInp = makeTextarea({ value: escapeText(existing.fullDescription || ""), rows: 4 }); const fullField = fieldWrap("Full description", fullInp);
+  const whatsInp = makeTextarea({ value: escapeText(existing.whatsNew || ""), rows: 3 }); const whatsField = fieldWrap("What's new", whatsInp);
+  const scrVal = normalizeObjectList(existing.screenshots).map((s) => escapeText(s)).join("\n");
+  const scrInp = makeTextarea({ value: scrVal, rows: 4, placeholder: "https://...\nhttps://..." }); const scrField = fieldWrap("Screenshots (one URL per line)", scrInp); scrField.classList.add("field-wide");
+  const pubSW = document.createElement("label"); pubSW.className = "switch";
+  const pubCk = document.createElement("input"); pubCk.type = "checkbox"; pubCk.checked = isEdit ? asBool(existing.published, true) : true;
+  const pubTr = document.createElement("span"); pubTr.className = "track";
+  const pubTx = document.createElement("span"); pubTx.className = "sw-label"; pubTx.textContent = "Published";
+  pubCk.addEventListener("change", () => { pubTx.textContent = pubCk.checked ? "Published" : "Hidden"; });
+  pubSW.appendChild(pubCk); pubSW.appendChild(pubTr); pubSW.appendChild(pubTx); const pubField = fieldWrap("Published", pubSW);
+  const featSW = document.createElement("label"); featSW.className = "switch";
+  const featCk = document.createElement("input"); featCk.type = "checkbox"; featCk.checked = isEdit ? asBool(existing.featured, false) : false;
+  const featTr = document.createElement("span"); featTr.className = "track";
+  const featTx = document.createElement("span"); featTx.className = "sw-label"; featTx.textContent = "Featured";
+  featCk.addEventListener("change", () => { featTx.textContent = featCk.checked ? "Featured ON" : "Featured"; });
+  featSW.appendChild(featCk); featSW.appendChild(featTr); featSW.appendChild(featTx); const featField = fieldWrap("Featured", featSW);
+
+  grid.appendChild(nameField); grid.appendChild(pkgField); grid.appendChild(vcField); grid.appendChild(verField);
+  grid.appendChild(sizeField); grid.appendChild(sizeBytesField); grid.appendChild(catField); grid.appendChild(pubField);
+  grid.appendChild(ratingField); grid.appendChild(dlField); grid.appendChild(priceField); grid.appendChild(iconField);
+  grid.appendChild(apkUrlField); grid.appendChild(shaField); grid.appendChild(descField); grid.appendChild(fullField);
+  grid.appendChild(whatsField); grid.appendChild(scrField); grid.appendChild(featField);
+
+  const actions = document.createElement("div"); actions.className = "row wrap"; actions.style.marginTop = "18px";
+  const saveBtn = document.createElement("button"); saveBtn.type = "submit"; saveBtn.className = "btn"; saveBtn.dataset.write = "1"; saveBtn.textContent = isEdit ? "Save changes" : "App save karein";
+  const cancelBtn = document.createElement("button"); cancelBtn.type = "button"; cancelBtn.className = "btn btn-ghost"; cancelBtn.textContent = "Cancel"; cancelBtn.addEventListener("click", () => go("apps"));
+  actions.appendChild(saveBtn); actions.appendChild(cancelBtn); form.appendChild(actions); root.appendChild(form);
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault(); if (!guardOnline()) return;
+    $$(".field.invalid", form).forEach((f) => f.classList.remove("invalid"));
+    const errors = [];
+    const setErr = (field, msg) => { field.classList.add("invalid"); const e2 = field.querySelector(".err"); if (e2) e2.textContent = msg; errors.push(msg); };
+    const nameVal = nameInp.value.trim(); if (!nameVal) setErr(nameField, "Name required");
+    const pkgVal = pkgInp.value.trim(); const pkgRe = /^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$/;
+    if (!pkgVal) setErr(pkgField, "Package name required"); else if (!pkgRe.test(pkgVal)) setErr(pkgField, "Galat format (com.example.app)");
+    let dupWarn = false; Object.keys(state.paidApps).forEach((id) => { if (id !== editId) { const a = state.paidApps[id] || {}; if (escapeText(a.packageName).toLowerCase() === pkgVal.toLowerCase()) dupWarn = true; } });
+    const vcVal = vcInp.value.trim(); const vcNum = Number(vcVal); if (!vcVal || !Number.isInteger(vcNum) || vcNum < 1) setErr(vcField, "Version code ≥ 1 integer");
+    const prVal = priceInp.value.trim(); const prNum = Number(prVal); if (prVal === "" || !Number.isInteger(prNum) || prNum < 0) setErr(priceField, "Price ≥ 0 integer");
+    const apkVal = apkUrlInp.value.trim(); if (!apkVal) setErr(apkUrlField, "apkUrl required"); else if (!/^https:\/\//i.test(apkVal)) setErr(apkUrlField, "https:// se shuru");
+    const iconVal = iconInp.value.trim(); if (iconVal && !/^https:\/\//i.test(iconVal)) setErr(iconField, "https only");
+    const scrList = scrInp.value.split("\n").map((s) => s.trim()).filter(Boolean);
+    for (const s of scrList) { if (!/^https:\/\//i.test(s)) { setErr(scrField, "Screenshots https only"); break; } }
+    if (ratingInp.value !== "") { const r = Number(ratingInp.value); if (!Number.isFinite(r) || r < 0 || r > 5) setErr(ratingField, "Rating 0–5"); }
+    const shaVal = shaInp.value.trim().toLowerCase(); if (shaVal && !/^[0-9a-f]{64}$/.test(shaVal)) setErr(shaField, "64 hex chars");
+    if (dupWarn) toast("Warning: Ye packageName kisi aur app me bhi hai", "warn", 5000);
+    if (errors.length) { toast("Form me errors hain", "err"); return; }
+    const appPayload = cleanUndefined({
+      name: nameVal, packageName: pkgVal, versionCode: vcNum, version: verInp.value.trim() || null, size: sizeInp.value.trim() || null,
+      sizeBytes: sizeBytesInp.value ? asNumber(sizeBytesInp.value, 0) : null, category: catInp.value.trim() || null, publisher: pubInp.value.trim() || null,
+      rating: ratingInp.value !== "" ? Number(ratingInp.value) : null, downloads: dlInp.value.trim() || null, icon: iconVal || null,
+      description: descInp.value.trim() || null, fullDescription: fullInp.value.trim() || null, whatsNew: whatsInp.value.trim() || null,
+      screenshots: scrList.length ? scrList : null, price: prNum, published: pubCk.checked, featured: featCk.checked,
+      createdAt: isEdit && existing.createdAt ? existing.createdAt : serverTimestamp(), updatedAt: serverTimestamp()
+    });
+    const linkPayload = cleanUndefined({ apkUrl: apkVal, sha256: shaVal || null });
+    saveBtn.disabled = true; const orig = saveBtn.textContent; saveBtn.textContent = ""; saveBtn.appendChild(createLoader(18)); saveBtn.appendChild(document.createTextNode(" Saving..."));
+    try {
+      if (isEdit) {
+        const updates = { ["paidApps/" + existing.id]: appPayload };
+        updates["premiumLinks/" + existing.id] = linkPayload || null;
+        await update(ref(db), cleanUndefined(updates) || updates); toast("App save ho gaya"); go("apps");
+      } else {
+        const newRef = push(ref(db, "paidApps")); const newId = newRef.key; if (!newId) throw new Error("Push key nahi mili");
+        const updates = { ["paidApps/" + newId]: appPayload };
+        if (linkPayload) updates["premiumLinks/" + newId] = linkPayload;
+        await update(ref(db), cleanUndefined(updates) || updates); toast("App save ho gaya"); go("apps");
+      }
+    } catch (err) { toast("Save fail: " + (err?.message || ""), "err"); saveBtn.disabled = false; saveBtn.textContent = orig; }
+  });
+
+  if (isEdit) {
+    try {
+      const snap = await get(ref(db, "premiumLinks/" + editId)); const val = snap.val() || {};
+      if (val.apkUrl) apkUrlInp.value = val.apkUrl;
+      if (val.sha256) shaInp.value = val.sha256;
+    } catch {}
+  }
+}
+
+let custSearch = "";
+function renderCustomers(root) {
+  const head = document.createElement("div"); head.className = "page-head";
+  const h = document.createElement("div"); const h1 = document.createElement("h1"); h1.textContent = "Customers";
+  const p = document.createElement("p"); p.textContent = "Purchases ke hisaab se customers.";
+  h.appendChild(h1); h.appendChild(p); head.appendChild(h); root.appendChild(head);
+  if (!state.purchasesLoaded) { root.appendChild(loadingBlock("Customers load ho rahe hain...")); return; }
+  const custMap = new Map();
+  try {
+    for (const uid of Object.keys(state.purchasesRaw)) {
+      const g = state.purchasesRaw[uid] || {}; const appsL = []; let total = 0;
+      for (const appId of Object.keys(g)) { const p2 = g[appId] || {}; const amt = asNumber(p2.amount, 0); total += amt; appsL.push({ appId, amount: amt, approvedAt: p2.approvedAt, orderId: escapeText(p2.orderId || "") }); }
+      if (!appsL.length) continue;
+      let email = "";
+      try { const g2 = state.ordersRaw[uid] || {}; for (const oid of Object.keys(g2)) { const o = g2[oid] || {}; if (o.email) { email = escapeText(o.email); break; } } } catch {}
+      custMap.set(uid, { uid, email, apps: appsL, total });
+    }
+  } catch {}
+  const bar = document.createElement("div"); bar.className = "filterbar";
+  const sw = document.createElement("div"); sw.className = "search-wrap"; sw.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`;
+  const sInp = document.createElement("input"); sInp.className = "input"; sInp.placeholder = "Email se search"; sInp.value = custSearch;
+  sInp.addEventListener("input", () => { custSearch = sInp.value; renderRoute(); }); sw.appendChild(sInp); bar.appendChild(sw); root.appendChild(bar);
+  let list = Array.from(custMap.values());
+  if (custSearch.trim()) { const q = custSearch.trim().toLowerCase(); list = list.filter((c) => (c.email || "").toLowerCase().includes(q) || c.uid.toLowerCase().includes(q)); }
+  list.sort((a, b) => b.total - a.total);
+  if (!list.length) { const e = document.createElement("div"); e.className = "card"; e.style.cssText = "text-align:center;color:var(--text-soft);padding:32px 16px"; e.textContent = "Abhi koi customer nahi"; root.appendChild(e); return; }
+  const stack = document.createElement("div"); stack.className = "stack";
+  list.forEach((c) => {
+    const card = document.createElement("div"); card.className = "card";
+    const top = document.createElement("div"); top.className = "row wrap";
+    const el = document.createElement("div"); el.className = "grow";
+    const e = document.createElement("div"); e.style.fontWeight = "700"; e.textContent = c.email || c.uid;
+    const sub = document.createElement("div"); sub.className = "muted"; sub.style.fontSize = "13px"; sub.textContent = c.apps.length + " apps · " + formatRupees(c.total) + " spent";
+    el.appendChild(e); el.appendChild(sub); top.appendChild(el); card.appendChild(top);
+    const lw = document.createElement("div"); lw.style.marginTop = "10px"; lw.style.display = "grid"; lw.style.gap = "8px";
+    c.apps.forEach((a) => {
+      const meta = state.paidApps[a.appId] || {}; const row = document.createElement("div"); row.className = "row wrap"; row.style.justifyContent = "space-between"; row.style.borderTop = "1px solid var(--line)"; row.style.paddingTop = "8px";
+      const nm = document.createElement("div"); nm.className = "grow";
+      const t = document.createElement("div"); t.style.fontWeight = "600"; t.style.fontSize = "14px"; t.textContent = escapeText(meta.name || a.appId);
+      const mt = document.createElement("div"); mt.className = "muted"; mt.style.fontSize = "12px"; mt.textContent = formatRupees(a.amount) + " · " + formatDateTime(a.approvedAt);
+      nm.appendChild(t); nm.appendChild(mt); row.appendChild(nm);
+      const rv = document.createElement("button"); rv.type = "button"; rv.className = "btn btn-danger-ghost btn-sm"; rv.dataset.write = "1"; rv.textContent = "Revoke";
+      rv.addEventListener("click", async () => {
+        if (!guardOnline()) return;
+        const ok = await confirmDialog("Revoke access?", `User ${c.email || c.uid} ka ${escapeText(meta.name || a.appId)} access band ho jayega.`, "Revoke karein", true);
+        if (!ok) return;
+        try { await update(ref(db), { ["purchases/" + c.uid + "/" + a.appId]: null }); toast("Access revoke ho gaya"); }
+        catch (err) { toast("Revoke fail: " + (err?.message || ""), "err"); }
+      });
+      row.appendChild(rv); lw.appendChild(row);
+    });
+    card.appendChild(lw); stack.appendChild(card);
+  });
+  root.appendChild(stack);
+}
+
+function renderSales(root) {
+  const head = document.createElement("div"); head.className = "page-head";
+  const h = document.createElement("div"); const h1 = document.createElement("h1"); h1.textContent = "Sales";
+  const p = document.createElement("p"); p.textContent = "Approved orders se revenue.";
+  h.appendChild(h1); h.appendChild(p); head.appendChild(h); root.appendChild(head);
+  if (!state.ordersLoaded) { root.appendChild(loadingBlock("Sales load ho rahe hain...")); return; }
+  const orders = collectOrders();
+  const approved = orders.filter((o) => o.status === "approved");
+  const pending = orders.filter((o) => o.status === "pending");
+  const now = new Date(); const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const startOfWeek = startOfDay - 6 * 24 * 60 * 60 * 1000; const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  let total = 0, today = 0, week = 0, month = 0, pendingValue = 0;
+  const perApp = new Map();
+  for (const o of approved) {
+    total += o.amount; const t = typeof o.createdAt === "number" ? o.createdAt : 0;
+    if (t >= startOfDay) today += o.amount; if (t >= startOfWeek) week += o.amount; if (t >= startOfMonth) month += o.amount;
+    const key = o.appId || "unknown"; const cur = perApp.get(key) || { count: 0, revenue: 0, name: o.appName || o.appId };
+    cur.count += 1; cur.revenue += o.amount; perApp.set(key, cur);
+  }
+  for (const o of pending) pendingValue += o.amount;
+  const statGrid = document.createElement("div"); statGrid.className = "stat-grid";
+  [ { k: "Total revenue", v: formatRupees(total), cls: "gold" }, { k: "Orders", v: String(approved.length), cls: "" }, { k: "Today", v: formatRupees(today), cls: "" }, { k: "Last 7 days", v: formatRupees(week), cls: "" }, { k: "This month", v: formatRupees(month), cls: "" }, { k: "Pending value", v: formatRupees(pendingValue), cls: "" } ].forEach((s) => {
+    const d = document.createElement("div"); d.className = "stat";
+    const k = document.createElement("div"); k.className = "k"; k.textContent = s.k;
+    const v = document.createElement("div"); v.className = "v " + s.cls; v.textContent = s.v;
+    d.appendChild(k); d.appendChild(v); statGrid.appendChild(d);
+  });
+  root.appendChild(statGrid);
+  const perAppArr = Array.from(perApp.values()).sort((a, b) => b.revenue - a.revenue);
+  const tc = document.createElement("div"); tc.className = "card"; tc.style.marginTop = "16px";
+  const th = document.createElement("h3"); th.textContent = "Per app sales"; th.style.marginBottom = "10px"; tc.appendChild(th);
+  if (!perAppArr.length) { const e = document.createElement("p"); e.className = "muted"; e.textContent = "Abhi koi approved sale nahi"; tc.appendChild(e); }
+  else {
+    const tw = document.createElement("div"); tw.className = "table-wrap";
+    const tb = document.createElement("table"); tb.className = "data";
+    tb.innerHTML = `<thead><tr><th>App</th><th class="num">Orders</th><th class="num">Revenue</th></tr></thead>`;
+    const tbody = document.createElement("tbody");
+    perAppArr.forEach((p2) => {
+      const tr = document.createElement("tr");
+      const td1 = document.createElement("td"); td1.textContent = p2.name;
+      const td2 = document.createElement("td"); td2.className = "num"; td2.textContent = String(p2.count);
+      const td3 = document.createElement("td"); td3.className = "num"; td3.textContent = formatRupees(p2.revenue);
+      tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3); tbody.appendChild(tr);
+    });
+    tb.appendChild(tbody); tw.appendChild(tb); tc.appendChild(tw);
+  }
+  root.appendChild(tc);
+  if (perAppArr.length) {
+    const cc = document.createElement("div"); cc.className = "card"; cc.style.marginTop = "16px";
+    const ch = document.createElement("h3"); ch.textContent = "Revenue chart"; ch.style.marginBottom = "10px"; cc.appendChild(ch);
+    const bars = document.createElement("div"); bars.className = "bars";
+    const max = Math.max(...perAppArr.map((p2) => p2.revenue), 1);
+    perAppArr.forEach((p2) => {
+      const row = document.createElement("div"); row.className = "bar-row";
+      const lb = document.createElement("div"); lb.textContent = p2.name; lb.style.overflow = "hidden"; lb.style.textOverflow = "ellipsis";
+      const tr = document.createElement("div"); tr.className = "bar-track";
+      const fl = document.createElement("div"); fl.className = "bar-fill"; fl.style.width = Math.max(4, (p2.revenue / max) * 100) + "%"; tr.appendChild(fl);
+      const vl = document.createElement("div"); vl.className = "bar-val"; vl.textContent = formatRupees(p2.revenue);
+      row.appendChild(lb); row.appendChild(tr); row.appendChild(vl); bars.appendChild(row);
+    });
+    cc.appendChild(bars); root.appendChild(cc);
+  }
+}
+
+function renderIO(root) {
+  const head = document.createElement("div"); head.className = "page-head";
+  const h = document.createElement("div"); const h1 = document.createElement("h1"); h1.textContent = "Import / Export";
+  const p = document.createElement("p"); p.textContent = "Apps ka JSON export/import (apk links ke bina export).";
+  h.appendChild(h1); h.appendChild(p); head.appendChild(h); root.appendChild(head);
+  const ec = document.createElement("div"); ec.className = "card";
+  const et = document.createElement("h3"); et.textContent = "Export JSON"; et.style.marginBottom = "10px"; ec.appendChild(et);
+  const ed = document.createElement("p"); ed.className = "muted"; ed.style.fontSize = "13px"; ed.textContent = "paidApps (price ke saath, apk links ke bina) clipboard me copy hote hain."; ec.appendChild(ed);
+  const expBtn = document.createElement("button"); expBtn.type = "button"; expBtn.className = "btn"; expBtn.textContent = "Export JSON copy karein";
+  expBtn.addEventListener("click", async () => {
+    const arr = Object.keys(state.paidApps).map((id) => {
+      const a = state.paidApps[id] || {};
+      return { id, name: a.name, packageName: a.packageName, versionCode: a.versionCode, version: a.version, size: a.size, sizeBytes: a.sizeBytes, category: a.category, publisher: a.publisher, rating: a.rating, downloads: a.downloads, icon: a.icon, description: a.description, fullDescription: a.fullDescription, whatsNew: a.whatsNew, screenshots: normalizeObjectList(a.screenshots), price: a.price, published: asBool(a.published, true), featured: asBool(a.featured, false), createdAt: a.createdAt, updatedAt: a.updatedAt };
+    });
+    const text = JSON.stringify(arr, null, 2); let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; } catch {}
+    if (!ok) { const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.left = "-9999px"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok = true; } catch {} ta.remove(); }
+    toast(ok ? "JSON clipboard me copy ho gaya" : "Copy fail", ok ? "ok" : "err");
+    if (!ok) console.log(text);
+  });
+  ec.appendChild(expBtn); root.appendChild(ec);
+  const ic = document.createElement("div"); ic.className = "card"; ic.style.marginTop = "16px";
+  const it = document.createElement("h3"); it.textContent = "Import JSON"; it.style.marginBottom = "10px"; ic.appendChild(it);
+  const id2 = document.createElement("p"); id2.className = "muted"; id2.style.fontSize = "13px"; id2.textContent = "Array ya id -> app object. Duplicate packageName skip honge."; ic.appendChild(id2);
+  const ta = document.createElement("textarea"); ta.className = "textarea"; ta.rows = 8; ta.placeholder = '[{ "name": "...", "packageName": "...", "price": 49, "apkUrl": "https://..." }]'; ic.appendChild(ta);
+  const pv = document.createElement("div"); pv.className = "hint"; pv.style.marginTop = "6px"; pv.textContent = "Paste karke preview karein."; ic.appendChild(pv);
+  const pvBtn = document.createElement("button"); pvBtn.type = "button"; pvBtn.className = "btn btn-ghost"; pvBtn.style.marginTop = "10px"; pvBtn.textContent = "Preview karein";
+  let parsed = [];
+  pvBtn.addEventListener("click", () => {
+    parsed = []; pv.textContent = "";
+    let data; try { data = JSON.parse(ta.value); } catch (e) { pv.textContent = "JSON galat: " + (e?.message || ""); return; }
+    const items = Array.isArray(data) ? data : (data && typeof data === "object" ? Object.keys(data).map((k) => ({ id: k, ...(data[k] || {}) })) : []);
+    const valid = items.filter((x) => x && typeof x === "object" && (x.name || x.packageName)); parsed = valid;
+    const existing = new Set(Object.values(state.paidApps).map((a) => escapeText(a.packageName).toLowerCase()).filter(Boolean));
+    let dup = 0; valid.forEach((x) => { const p3 = escapeText(x.packageName).toLowerCase(); if (p3 && existing.has(p3)) dup++; });
+    pv.textContent = `${valid.length} items valid, ${dup} duplicate skip honge.`;
+  });
+  ic.appendChild(pvBtn);
+  const importBtn = document.createElement("button"); importBtn.type = "button"; importBtn.className = "btn"; importBtn.dataset.write = "1"; importBtn.style.marginTop = "10px"; importBtn.style.marginLeft = "8px"; importBtn.textContent = "Import karein";
+  importBtn.addEventListener("click", async () => {
+    if (!guardOnline()) return;
+    if (!parsed.length) { toast("Pehle preview karein", "warn"); return; }
+    const existing = new Set(Object.values(state.paidApps).map((a) => escapeText(a.packageName).toLowerCase()).filter(Boolean));
+    let imported = 0, skipped = 0; importBtn.disabled = true; const orig = importBtn.textContent; importBtn.textContent = ""; importBtn.appendChild(createLoader(18)); importBtn.appendChild(document.createTextNode(" Importing..."));
+    for (const item of parsed) {
+      try {
+        const pkg = escapeText(item.packageName).toLowerCase(); if (pkg && existing.has(pkg)) { skipped++; continue; }
+        const appPayload = cleanUndefined({
+          name: escapeText(item.name), packageName: escapeText(item.packageName), versionCode: asNumber(item.versionCode, 1), version: escapeText(item.version) || null,
+          size: escapeText(item.size) || null, sizeBytes: item.sizeBytes != null ? asNumber(item.sizeBytes, 0) : null, category: escapeText(item.category) || null,
+          publisher: escapeText(item.publisher) || null, rating: item.rating != null ? asNumber(item.rating, 0) : null, downloads: escapeText(item.downloads) || null,
+          icon: escapeText(item.icon) || null, description: escapeText(item.description) || null, fullDescription: escapeText(item.fullDescription) || null,
+          whatsNew: escapeText(item.whatsNew) || null, screenshots: normalizeObjectList(item.screenshots).length ? normalizeObjectList(item.screenshots) : null,
+          price: asNumber(item.price, 0), published: asBool(item.published, true), featured: asBool(item.featured, false), createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+        });
+        if (!appPayload || !appPayload.name || !appPayload.packageName) { skipped++; continue; }
+        const nr = push(ref(db, "paidApps")); const nid = nr.key; if (!nid) { skipped++; continue; }
+        const updates = { ["paidApps/" + nid]: appPayload };
+        if (item.apkUrl && /^https:\/\//i.test(escapeText(item.apkUrl))) { updates["premiumLinks/" + nid] = cleanUndefined({ apkUrl: escapeText(item.apkUrl), sha256: escapeText(item.sha256) || null }); }
+        await update(ref(db), cleanUndefined(updates) || updates); imported++; existing.add(pkg);
+      } catch { skipped++; }
+    }
+    importBtn.disabled = false; importBtn.textContent = orig;
+    toast(`${imported} import hue, ${skipped} skip hue`, imported ? "ok" : "warn");
+  });
+  ic.appendChild(importBtn); root.appendChild(ic);
+}
+
+const MAX_TAIL = 70000; const MAX_CD = 32 * 1024 * 1024; const MAX_MANIFEST = 16 * 1024 * 1024;
+function withTimeout(promise, ms, msg) {
+  let t; const timer = new Promise((_, rej) => { t = setTimeout(() => rej(new Error(msg || "timeout")), ms); });
+  return Promise.race([promise, timer]).finally(() => clearTimeout(t));
+}
+async function readBytes(blob, start, end) { return new Uint8Array(await blob.slice(start, end).arrayBuffer()); }
+async function inflateRaw(bytes) {
+  if (typeof DecompressionStream === "function") {
+    try { const ds = new DecompressionStream("deflate-raw"); const out = new Response(new Blob([bytes]).stream().pipeThrough(ds)).arrayBuffer(); return new Uint8Array(await withTimeout(out, 8000, "inflate timeout")); } catch {}
+  }
+  const m = await withTimeout(import("https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js"), 8000, "lib timeout");
+  return m.inflateSync(bytes);
+}
+async function findManifest(file) {
+  const size = file.size; if (size < 22) throw new Error("File bahut chhoti hai");
+  const tailStart = Math.max(0, size - MAX_TAIL); const tail = await readBytes(file, tailStart, size);
+  const tdv = new DataView(tail.buffer, tail.byteOffset, tail.byteLength);
+  let eocd = -1; for (let i = tail.length - 22; i >= 0; i--) { if (tdv.getUint32(i, true) === 0x06054b50) { eocd = i; break; } }
+  if (eocd < 0) throw new Error("Ye valid APK/zip nahi lag raha");
+  const entries = tdv.getUint16(eocd + 10, true); const cdSize = tdv.getUint32(eocd + 12, true); const cdOffset = tdv.getUint32(eocd + 16, true);
+  if (cdSize === 0xffffffff || cdOffset === 0xffffffff || entries === 0xffff) throw new Error("ZIP64 APK abhi support nahi");
+  if (cdSize > MAX_CD || cdOffset + cdSize > size) throw new Error("Central directory kharab");
+  const cd = await readBytes(file, cdOffset, cdOffset + cdSize);
+  const dv = new DataView(cd.buffer, cd.byteOffset, cd.byteLength); const dec = new TextDecoder("utf-8"); let p = 0;
+  for (let n = 0; n < entries && p + 46 <= cd.length; n++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true); const compSize = dv.getUint32(p + 20, true);
+    const nameLen = dv.getUint16(p + 28, true); const extraLen = dv.getUint16(p + 30, true); const commentLen = dv.getUint16(p + 32, true); const localOff = dv.getUint32(p + 42, true);
+    const name = dec.decode(cd.subarray(p + 46, p + 46 + nameLen));
+    if (name === "AndroidManifest.xml") {
+      if (compSize > MAX_MANIFEST) throw new Error("Manifest bahut bada");
+      const lh = await readBytes(file, localOff, localOff + 30); const ldv = new DataView(lh.buffer, lh.byteOffset, lh.byteLength);
+      if (ldv.getUint32(0, true) !== 0x04034b50) throw new Error("Local header kharab");
+      const dataStart = localOff + 30 + ldv.getUint16(26, true) + ldv.getUint16(28, true); const raw = await readBytes(file, dataStart, dataStart + compSize);
+      if (method === 0) return raw; if (method === 8) return await inflateRaw(raw); throw new Error("Anjaan compression (" + method + ")");
+    }
+    p += 46 + nameLen + extraLen + commentLen;
+  }
+  throw new Error("AndroidManifest.xml nahi mila");
+}
+function parseAxml(buf) {
+  const len = buf.length; const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+  if (len < 16 || dv.getUint16(0, true) !== 0x0003) throw new Error("Manifest format samajh nahi aaya");
+  const strings = []; const u32 = (o) => dv.getUint32(o, true); const u16 = (o) => dv.getUint16(o, true);
+  let pos = u16(2) || 8; let guard = 0;
+  while (pos + 8 <= len && guard++ < 200000) {
+    const type = u16(pos), hdr = u16(pos + 2), size = u32(pos + 4); if (size < 8 || pos + size > len) break;
+    if (type === 0x0001) {
+      const count = Math.min(u32(pos + 8), 200000); const utf8 = (u32(pos + 16) & 0x100) !== 0; const strStart = pos + u32(pos + 20); const offs = pos + hdr;
+      const u8dec = new TextDecoder("utf-8"), u16dec = new TextDecoder("utf-16le");
+      for (let i = 0; i < count; i++) {
+        let sp = strStart + u32(offs + 4 * i), s = ""; if (sp >= len) { strings.push(""); continue; }
+        if (utf8) { let c = buf[sp++]; if (c & 0x80) sp++; let b = buf[sp++]; if (b & 0x80) b = ((b & 0x7f) << 8) | buf[sp++]; if (sp + b <= len) s = u8dec.decode(buf.subarray(sp, sp + b)); }
+        else { let l = u16(sp); sp += 2; if (l & 0x8000) { l = ((l & 0x7fff) << 16) | u16(sp); sp += 2; } if (sp + l * 2 <= len) s = u16dec.decode(buf.subarray(sp, sp + l * 2)); }
+        strings.push(s);
+      }
+    } else if (type === 0x0102) {
+      if (strings[u32(pos + 20)] === "manifest") {
+        const attrStart = u16(pos + 24), attrSize = u16(pos + 26), attrCount = Math.min(u16(pos + 28), 200);
+        const out = { packageName: "", versionCode: 0, versionName: "" };
+        for (let k = 0; k < attrCount; k++) {
+          const a = pos + 16 + attrStart + k * (attrSize || 20); if (a + 20 > len) break;
+          const name = strings[u32(a + 4)]; const raw = u32(a + 8), dtype = buf[a + 15], data = u32(a + 16);
+          const str = () => strings[raw !== 0xffffffff ? raw : data] || "";
+          if (name === "package") out.packageName = dtype === 0x03 || raw !== 0xffffffff ? str() : "";
+          else if (name === "versionName") out.versionName = str();
+          else if (name === "versionCode") out.versionCode = (dtype === 0x10 || dtype === 0x11) ? data : (parseInt(str(), 10) || 0);
+        }
+        return out;
+      }
+    }
+    pos += size;
+  }
+  throw new Error("Manifest me package nahi mila");
+}
+async function readApkInfo(file) {
+  const run = async () => {
+    const manifest = await findManifest(file);
+    const info = parseAxml(manifest);
+    return { ...info, sizeBytes: file.size };
+  };
+  return withTimeout(run(), 15000, "APK padhne me bahut der lagi");
+}
+
+updateOnlineUI();
+if (!location.hash) location.hash = "#/orders";
+</script>
+</body>
+</html>
